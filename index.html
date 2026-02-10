@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Tracklet Campus Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Public+Sans:wght@400;500;700;800&amp;family=Space+Mono:wght@700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#CCFF00", // Lime Green
+              secondary: "#FF90E8", // Hot Pink for accents
+              tertiary: "#51E5FF", // Cyan
+              "neo-bg": "#FFF4E0", // Off-white/Cream
+              "neo-dark": "#1a1a1a", // Soft Black for dark mode bg
+              "neo-card": "#ffffff", // White
+              "neo-card-dark": "#2d2d2d", // Dark grey
+              "neo-border": "#000000",
+              "neo-border-dark": "#ffffff",
+            },
+            fontFamily: {
+              display: ["Archivo Black", "sans-serif"],
+              body: ["Public Sans", "sans-serif"],
+              mono: ["Space Mono", "monospace"],
+            },
+            boxShadow: {
+              neo: "4px 4px 0px 0px #000000",
+              "neo-sm": "2px 2px 0px 0px #000000",
+              "neo-dark": "4px 4px 0px 0px #ffffff",
+            },
+            borderWidth: {
+              3: "3px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .hide-scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .neo-pattern {
+        background-image:
+          linear-gradient(0deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+        background-size: 24px 24px;
+        background-position: -1px -1px;
+      }
+      .dark .neo-pattern {
+        background-image:
+          linear-gradient(0deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      }
+      .dark .shadow-neo {
+        box-shadow: 4px 4px 0px 0px #ffffff;
+      }
+      .dark .shadow-neo-sm {
+        box-shadow: 2px 2px 0px 0px #ffffff;
+      }
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-neo-bg dark:bg-neo-dark neo-pattern font-body text-black dark:text-white transition-colors duration-200 antialiased overflow-x-hidden"
+  >
+    <div
+      class="max-w-md mx-auto min-h-screen relative pb-24 border-x-3 border-neo-border dark:border-neo-border-dark bg-neo-bg dark:bg-neo-dark"
+    >
+      <header
+        class="flex items-center justify-between px-4 py-3 border-b-3 border-neo-border dark:border-neo-border-dark bg-white dark:bg-neo-card-dark sticky top-0 z-50"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 bg-primary border-3 border-black flex items-center justify-center rounded-sm shadow-neo-sm"
+          >
+            <span class="material-icons-outlined text-black text-lg"
+              >directions_run</span
+            >
+          </div>
+          <div>
+            <h1
+              class="font-display text-xl tracking-tighter uppercase leading-none dark:text-white"
+            >
+              Tracklet
+            </h1>
+            <p
+              class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-400"
+            >
+              Campus commute
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button
+            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center hover:bg-secondary transition-colors shadow-neo-sm"
+          >
+            <span
+              class="material-icons-outlined text-black dark:text-white text-lg"
+              >notifications</span
+            >
+          </button>
+          <button
+            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center hover:bg-tertiary transition-colors shadow-neo-sm overflow-hidden"
+          >
+            <img
+              alt="User Profile"
+              class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDslkQ90QCcDKEPP0TIev4kplvMWqFC5RFLfhIFygOPVsMbRTsRk17A5S2hC5JnQz3CmY2YlPNQK46x1mJlEM9c720WWgN-Ymy8_evWxLWuQ9NB57a2Tzfz-WFMc3vU2OSizd_1pJkaMxg6rTlmo7lpDxpi_dK4t6Nb4mlKSl83mohltc2St1AVesefQBKYn_WFAcJgPUEAM-HBIv09PP61fOAFT0UR7zzE18ORU6WRndHKxyQ2ivwTPX_X5iP7PnWJ97DczAdtR9U"
+            />
+          </button>
+        </div>
+      </header>
+      <main class="p-4 space-y-4">
+        <div
+          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-3 shadow-neo"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-10 h-10 bg-primary border-3 border-black flex items-center justify-center rounded-md shadow-neo-sm"
+            >
+              <span class="material-icons-outlined text-black text-lg"
+                >search</span
+              >
+            </div>
+            <div class="flex-1">
+              <label
+                class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-400"
+                for="destination-search"
+              >
+                Destination
+              </label>
+              <input
+                id="destination-search"
+                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black px-3 py-2 font-mono text-xs uppercase placeholder:text-gray-400 focus:outline-none"
+                placeholder="Where are you going?"
+                value="Central Library"
+              />
+            </div>
+            <button
+              class="bg-black text-white dark:bg-white dark:text-black border-2 border-black px-3 py-2 font-mono text-[10px] uppercase shadow-neo-sm"
+            >
+              Go
+            </button>
+          </div>
+        </div>
+        <div
+          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
+        >
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between gap-3">
+              <p
+                class="font-display text-2xl uppercase tracking-wide text-black dark:text-white"
+              >
+                Good morning, Shashank
+              </p>
+            </div>
+            <div
+              class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-400"
+            >
+              Destination: Central Library
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-primary border-3 border-black dark:border-white rounded-xl p-5 shadow-neo relative overflow-hidden group"
+        >
+          <div class="absolute right-4 top-4">
+            <div
+              class="w-12 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-neo-sm"
+            >
+              <span class="material-icons-outlined text-2xl text-black"
+                >north_east</span
+              >
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <span
+              class="bg-white border-2 border-black px-2 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm inline-block"
+            >
+              Recommended
+            </span>
+          </div>
+
+          <h3
+            class="font-display text-5xl uppercase leading-none mb-3 text-black tracking-tighter mt-3"
+          >
+            WALK
+          </h3>
+
+          <div class="mb-4">
+            <div
+              class="bg-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase text-black shadow-neo-sm"
+            >
+              ETA 7:50–7:55 AM · leave within 5 min
+            </div>
+            <p class="font-body text-sm font-bold text-black mt-2">
+              Most reliable route right now
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <div
+              class="bg-secondary border-2 border-black px-3 py-1.5 font-bold text-xs uppercase flex items-center gap-1 text-black shadow-neo-sm"
+            >
+              <span class="material-icons-outlined text-sm">warning</span>
+              Delay risk: medium
+            </div>
+            <div
+              class="bg-white border-2 border-black px-3 py-1.5 font-bold text-xs uppercase text-black shadow-neo-sm"
+            >
+              <span class="material-icons-outlined text-sm">water_drop</span>
+              Rain: likely
+            </div>
+          </div>
+        </div>
+        <div>
+          <h4
+            class="font-mono text-xs font-bold uppercase text-gray-600 dark:text-gray-400 mb-2"
+          >
+            Options to Central Library
+          </h4>
+          <div class="grid grid-cols-3 gap-2">
+            <div
+              class="bg-black border-3 border-black dark:border-white rounded-lg py-2 px-1 relative shadow-neo-sm flex flex-col items-center justify-center text-white cursor-pointer transform hover:-translate-y-1 transition-transform"
+            >
+              <div
+                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10"
+              >
+                REC
+              </div>
+              <span class="material-icons-outlined text-2xl mb-1"
+                >directions_walk</span
+              >
+              <div class="font-display text-lg leading-none">WALK</div>
+              <div class="font-mono text-[10px] text-gray-300 mt-1">10 MIN</div>
+            </div>
+            <div
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer"
+            >
+              <span class="material-icons-outlined text-2xl mb-1"
+                >directions_bus</span
+              >
+              <div class="font-display text-lg leading-none">BUS</div>
+              <div
+                class="font-mono text-[10px] text-gray-500 dark:text-gray-400 mt-1"
+              >
+                15 MIN
+              </div>
+            </div>
+            <div
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer"
+            >
+              <span class="material-icons-outlined text-2xl mb-1"
+                >directions_car</span
+              >
+              <div class="font-display text-lg leading-none">POOL</div>
+              <div
+                class="font-mono text-[10px] text-gray-500 dark:text-gray-400 mt-1"
+              >
+                12 MIN
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
+        >
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-display text-lg uppercase">Route</h4>
+            <button
+              class="bg-black text-white dark:bg-white dark:text-black p-1 rounded-full"
+            >
+              <span class="material-icons-outlined text-sm">open_in_full</span>
+            </button>
+          </div>
+          <div class="flex justify-between items-center mb-3">
+            <div class="font-mono text-xs font-bold uppercase">
+              MBH II → Central Library
+            </div>
+            <div
+              class="bg-primary text-black border-2 border-black px-2 py-0.5 text-[10px] font-bold uppercase"
+            >
+              Clear
+            </div>
+          </div>
+          <div class="h-20 relative flex items-center">
+            <div
+              class="absolute w-full h-2 bg-gray-200 dark:bg-gray-600 border-2 border-black dark:border-white"
+            ></div>
+            <div class="absolute w-2/3 h-2 bg-black dark:bg-white left-0"></div>
+            <div
+              class="w-4 h-4 bg-white border-3 border-black dark:border-white z-10 absolute left-0"
+            ></div>
+            <div
+              class="w-12 h-12 bg-primary border-3 border-black dark:border-white z-10 absolute left-2/3 -ml-6 shadow-neo-sm flex items-center justify-center"
+            >
+              <span class="material-icons-outlined text-lg text-black"
+                >directions_walk</span
+              >
+            </div>
+            <div
+              class="w-4 h-4 bg-white border-3 border-black dark:border-white z-10 absolute right-0"
+            ></div>
+          </div>
+          <div
+            class="flex justify-between text-[10px] font-mono font-bold mt-2 text-gray-500 dark:text-gray-400 uppercase"
+          >
+            <span>Start</span>
+            <span>Destination</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <h4 class="font-display text-xl uppercase">
+                Autopool to Central Library
+              </h4>
+              <p
+                class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-400"
+              >
+                Seats and time impact
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 overflow-x-auto hide-scroll pb-2">
+            <div
+              class="min-w-[240px] bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-xl p-4 shadow-neo flex-shrink-0"
+            >
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-gray-200 border-2 border-black overflow-hidden"
+                  >
+                    <img
+                      alt="Driver"
+                      class="w-full h-full object-cover"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6nMiQizm8l82MSPVDDJBLaiLYFgmMTNjMGKhNHRkD1LjWxpiiEMryNsEoxUt2wt6mNKhmC2tm_B9rOxmDa0EuMJ5-tne6zEOnr-vh8YcY8apHAfDfR-IS7svzlj8iLmuESx8AftRV7QCqfx99gYyLoEahh_HmPOPLD5O_RHF_V8_XUa21FRuNJrl0vR3aJCrVfv6o1Ve3fjErOe8akjfj0DZNgWcIe5Wi3AeWjJ8Z9vhD3ngOHW2n3YnXj1eA8ri3g7LL-V0LmyQ"
+                    />
+                  </div>
+                  <div>
+                    <p class="font-bold text-sm leading-none">Sarah K.</p>
+                    <p class="text-xs text-gray-500">Biology ’26</p>
+                  </div>
+                </div>
+                <span
+                  class="bg-primary border-2 border-black text-[10px] font-bold uppercase px-2 py-1 text-black shadow-neo-sm"
+                >
+                  Available
+                </span>
+              </div>
+              <div
+                class="bg-black text-white border-2 border-black px-3 py-2 font-display text-lg leading-none flex items-baseline justify-between mb-2"
+              >
+                <span>2 seats</span>
+                <span class="font-mono text-xs">+2 min</span>
+              </div>
+              <div class="font-mono text-[10px] uppercase mb-3 text-gray-600">
+                Backup option
+              </div>
+              <button
+                class="w-full bg-black text-white dark:bg-white dark:text-black font-display uppercase py-2 text-sm hover:bg-secondary hover:text-black transition-colors border-2 border-black"
+              >
+                Join ride
+              </button>
+            </div>
+            <div
+              class="min-w-[200px] bg-secondary border-3 border-black dark:border-white rounded-xl p-4 shadow-neo flex-shrink-0 flex items-center justify-center"
+            >
+              <div class="text-center">
+                <span class="material-icons-outlined text-4xl text-black mb-2"
+                  >add_circle_outline</span
+                >
+                <p class="font-display uppercase text-black">Offer<br />Ride</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-[#ffb6c1] dark:bg-[#7e3a44] border-3 border-black dark:border-white rounded-xl p-4 shadow-neo overflow-hidden"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <span
+                class="bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-mono text-[9px] font-bold uppercase border-2 border-black dark:border-white"
+              >
+                Quick task
+              </span>
+              <div class="font-mono text-[9px] uppercase mt-2 text-gray-800">
+                On your route to Central Library
+              </div>
+            </div>
+            <span
+              class="bg-white dark:bg-black text-black dark:text-white border-2 border-black dark:border-white px-2 py-1 font-mono text-[9px] font-bold uppercase"
+            >
+              Optional
+            </span>
+          </div>
+          <h5 class="font-display text-xl leading-none mb-1">Deliver Coffee</h5>
+          <p class="font-mono text-xs mb-1 text-gray-800">
+            Drop near Central Library · ₹30
+          </p>
+          <p class="font-mono text-[10px] uppercase text-gray-700">
+            Adds ~4 min to your route
+          </p>
+          <div class="flex justify-end mt-4">
+            <button
+              class="bg-transparent text-black dark:text-white border-2 border-black dark:border-white px-4 py-1 font-display uppercase text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-neo-sm"
+            >
+              Add to route
+            </button>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white p-4 shadow-neo relative mt-8 mb-4"
+        >
+          <div
+            class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase text-black rotate-1"
+          >
+            Happening Today
+          </div>
+          <div
+            class="border-2 border-black p-4 mt-2 bg-[#fff9ef] dark:bg-neo-card-dark"
+          >
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="font-display text-2xl uppercase leading-none">
+                Campus Market
+              </h3>
+              <span
+                class="bg-tertiary border-2 border-black px-2 py-1 font-mono text-[10px] font-bold uppercase text-black"
+              >
+                Today
+              </span>
+            </div>
+            <div class="font-mono text-xs font-bold uppercase mb-1">
+              Central Plaza · 12:00 PM · 6 min from Central Library
+            </div>
+            <div
+              class="bg-black text-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase mb-3"
+            >
+              Best way: Walk · 6 min from Central Library
+            </div>
+            <button
+              class="w-full bg-black text-white dark:bg-white dark:text-black px-3 py-2 font-display uppercase text-sm border-2 border-black shadow-neo-sm hover:bg-primary hover:text-black transition-colors"
+            >
+              View Walk Route
+            </button>
+          </div>
+        </div>
+      </main>
+      <nav
+        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-neo-card-dark border-t-3 border-neo-border dark:border-neo-border-dark py-3 px-6 z-50"
+      >
+        <div class="flex justify-between items-center">
+          <button
+            class="flex flex-col items-center gap-1 text-black dark:text-white group"
+          >
+            <div
+              class="w-12 h-8 bg-primary border-2 border-black dark:border-white rounded-full flex items-center justify-center transition-transform group-active:scale-95"
+            >
+              <span class="material-icons-outlined text-black text-lg"
+                >home</span
+              >
+            </div>
+          </button>
+          <button class="flex flex-col items-center gap-1 text-gray-400 group">
+            <span
+              class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
+              >map</span
+            >
+          </button>
+          <button class="flex flex-col items-center gap-1 text-gray-400 group">
+            <div class="relative">
+              <span
+                class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
+                >chat_bubble_outline</span
+              >
+              <div
+                class="absolute -top-1 -right-1 w-3 h-3 bg-secondary border border-black rounded-full"
+              ></div>
+            </div>
+          </button>
+          <button class="flex flex-col items-center gap-1 text-gray-400 group">
+            <span
+              class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
+              >person_outline</span
+            >
+          </button>
+        </div>
+      </nav>
+    </div>
+  </body>
+</html>
