@@ -32,14 +32,22 @@ export const START_LOCATIONS = [
 ];
 
 export const EVENTS = [
-  "Tathva Workshop",
-  "Ragam Cultural Event",
-  "IEEE Student Meet",
-  "Coding Club Session",
-  "Robotics Club Meet",
-  "Dance Club Practice",
-  "Literary Club Meetup",
-  "Quiz Club Event",
+  { name: "Tathva Workshop", location: "Main Building", label: "Workshop" },
+  {
+    name: "Ragam Cultural Event",
+    location: "Open Air Theatre",
+    label: "Live",
+  },
+  { name: "IEEE Student Meet", location: "Electrical Block", label: "Meetup" },
+  {
+    name: "Coding Club Session",
+    location: "Computer Science Department",
+    label: "Club",
+  },
+  { name: "Robotics Club Meet", location: "Mechanical Block", label: "Lab" },
+  { name: "Dance Club Practice", location: "Auditorium", label: "Practice" },
+  { name: "Literary Club Meetup", location: "Central Library", label: "Talk" },
+  { name: "Quiz Club Event", location: "SAC", label: "Event" },
 ];
 
 export const MICRO_GIGS = [
@@ -52,12 +60,51 @@ export const MICRO_GIGS = [
 ];
 
 export const AUTOPOOL_USERS = [
-  "Rahul M.",
-  "Ananya S.",
-  "Arjun K.",
-  "Neha P.",
-  "Sarah K.",
-  "Adithya R.",
+  { name: "Rahul M.", label: "Mechanical 26" },
+  { name: "Ananya S.", label: "ECE 25" },
+  { name: "Arjun K.", label: "CS 27" },
+  { name: "Neha P.", label: "Civil 26" },
+  { name: "Sarah K.", label: "Biology 26" },
+  { name: "Adithya R.", label: "Architecture 25" },
+];
+
+export const AUTOPOOL_MOCK_OFFERS = [
+  {
+    name: "Rahul M.",
+    label: "Mechanical 26",
+    vehicle: "Hatchback",
+    pickup: "MBH Gate",
+  },
+  {
+    name: "Ananya S.",
+    label: "ECE 25",
+    vehicle: "Scooter",
+    pickup: "SAC Signal",
+  },
+  {
+    name: "Arjun K.",
+    label: "CS 27",
+    vehicle: "Sedan",
+    pickup: "Main Building Steps",
+  },
+  {
+    name: "Neha P.",
+    label: "Civil 26",
+    vehicle: "SUV",
+    pickup: "Central Plaza East",
+  },
+  {
+    name: "Sarah K.",
+    label: "Biology 26",
+    vehicle: "Hatchback",
+    pickup: "Library Side Gate",
+  },
+  {
+    name: "Adithya R.",
+    label: "Architecture 25",
+    vehicle: "EV Scooter",
+    pickup: "LH Junction",
+  },
 ];
 
 export const MODES = ["WALK", "BUS", "POOL", "AUTO"];
@@ -79,27 +126,33 @@ export const MODE_COSTS = {
 };
 
 export const RATIONALES = {
-  WALK: [
-    "Walking time is predictable — no waiting, no delays.",
-    "Distance is short enough that walking is the fastest option.",
-    "Weather is clear. Walking is the safest bet right now.",
-    "Peak hours make bus unreliable. Walking guarantees arrival.",
-  ],
-  BUS: [
-    "Bus frequency is good right now. Low chance of a long wait.",
-    "Fastest covered option for this distance off-peak.",
-    "Bus stop is close. Combined wait and ride beats walking.",
-  ],
-  POOL: [
-    "Bus is frequently delayed at this hour. Pool is more reliable.",
-    "Distance is too far to walk comfortably. Pool is efficient.",
-    "Riders are moving along your route in the next few minutes.",
-  ],
-  AUTO: [
-    "It's late and other options are limited. Auto is the safest.",
-    "Distance and time of day make auto the most reliable choice.",
-    "Walking at this hour and distance carries high arrival risk.",
-  ],
+  WALK: {
+    short:
+      "Walking wins here because the route is short and timing stays predictable.",
+    wet: "Walking is still viable, but rain trims comfort and reliability on this route.",
+    steady:
+      "Walking avoids waiting entirely, which keeps this route dependable.",
+  },
+  BUS: {
+    fast: "The bus stays faster than walking here, even after accounting for wait time.",
+    peak: "The bus can work, but peak-hour headways add some timing risk right now.",
+    covered:
+      "The bus gives you a steadier trip when you want a more sheltered option.",
+  },
+  POOL: {
+    efficient:
+      "Pooling gives the best balance of speed and reliability on this distance.",
+    reroute:
+      "Nearby riders line up with your route, so pooling stays efficient here.",
+    recovery:
+      "Pooling beats the bus on reliability when road demand is uneven.",
+  },
+  AUTO: {
+    late: "Auto keeps the trip reliable when other shared options are less dependable.",
+    direct: "Auto is the most direct road option for this route right now.",
+    fallback:
+      "Auto works as the safest fallback when timing confidence drops elsewhere.",
+  },
 };
 
 export const COORDS = {
@@ -125,21 +178,24 @@ export const COORDS = {
   "Canteen Area": { lat: 11.321, lon: 75.935 },
 };
 
-export const randomInt = (min, max) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+export const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-export const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-export const normalizeDestination = (input) => {
+const normalizeLocation = (list, input, fallback) => {
   const needle = (input || "").trim().toLowerCase();
-  if (!needle) return randomItem(DESTINATIONS);
-  const exact = DESTINATIONS.find((item) => item.toLowerCase() === needle);
+  if (!needle) return fallback;
+
+  const exact = list.find((item) => item.toLowerCase() === needle);
   if (exact) return exact;
-  const partial = DESTINATIONS.find((item) =>
-    item.toLowerCase().includes(needle),
-  );
-  return partial || "Central Library";
+
+  const partial = list.find((item) => item.toLowerCase().includes(needle));
+  return partial || fallback;
 };
+
+export const normalizeDestination = (input) =>
+  normalizeLocation(DESTINATIONS, input, "Central Library");
+
+export const normalizeOrigin = (input) =>
+  normalizeLocation(START_LOCATIONS, input, START_LOCATIONS[0]);
 
 const toRad = (value) => (value * Math.PI) / 180;
 
@@ -156,7 +212,8 @@ export const distanceKmBetween = (from, to) => {
   return 6371 * 2 * Math.asin(Math.sqrt(h));
 };
 
-export const formatTime = (date) => {
+export const formatTime = (dateInput) => {
+  const date = new Date(dateInput);
   const hours24 = date.getHours();
   const minutes = date.getMinutes();
   const period = hours24 >= 12 ? "PM" : "AM";
@@ -171,7 +228,7 @@ export const formatRange = (start, end) => {
   const [sTime, sPeriod] = startStr.split(" ");
   const [eTime, ePeriod] = endStr.split(" ");
   if (sPeriod === ePeriod) {
-    return `${sTime}–${eTime} ${sPeriod}`;
+    return `${sTime}-${eTime} ${sPeriod}`;
   }
-  return `${sTime} ${sPeriod}–${eTime} ${ePeriod}`;
+  return `${sTime} ${sPeriod}-${eTime} ${ePeriod}`;
 };

@@ -1,196 +1,224 @@
 import {
-  SPEEDS,
-  COORDS,
-  distanceKmBetween,
-  randomInt,
   MODE_COSTS,
-  RELIABILITY_PEAK_HOURS,
   RATIONALES,
+  RELIABILITY_PEAK_HOURS,
+  SPEEDS,
+  clamp,
+  distanceKmBetween,
 } from "./data.js";
 
-export const RouteEngine = {
-  /**
-   * Scores all transportation modes for a given route.
-   * Returns { WALK, BUS, POOL, AUTO } with each containing { minutes, reliability, cost }
-   */
-  scoreRoutes(start, destination, hourOfDay) {
-    const startCoords = COORDS[start] || COORDS["Central Library"];
-    const destCoords = COORDS[destination] || COORDS["Central Library"];
-    const distanceKm = distanceKmBetween(start, destination);
+const minMinutes = (value) => Math.max(4, Math.round(value));
 
-    // Calculate minutes for each mode
-    const walkMinutes = Math.max(
-      4,
-      Math.round((distanceKm / SPEEDS.WALK) * 60),
-    );
-    const busMinutes = Math.max(
-      4,
-      Math.round((distanceKm / SPEEDS.BUS) * 60 + randomInt(3, 6)),
-    );
-    const poolMinutes = Math.max(
-      4,
-      Math.round((distanceKm / SPEEDS.POOL) * 60 + randomInt(1, 3)),
-    );
-    const autoMinutes = Math.max(
-      4,
-      Math.round((distanceKm / SPEEDS.AUTO) * 60 + randomInt(1, 3)),
-    );
+const toDelayRisk = (minutes, reliability, baselineMinutes) => {
+  const delta = minutes - baselineMinutes;
+  if (reliability < 0.65 || delta >= 7) return "HIGH";
+  if (reliability < 0.8 || delta >= 4) return "MEDIUM";
+  return "LOW";
+};
 
-    // Calculate reliability for each mode
-    const isPeakHour = RELIABILITY_PEAK_HOURS.includes(hourOfDay);
-    const busReliability = isPeakHour ? 0.55 : 0.85;
+const scoreCandidate = (mode, score, conditions) => {
+  const costWeight = score.cost * 2.2;
+  const reliabilityWeight = (1 - score.reliability) * 18;
+  const rainPenalty =
+    conditions.weather === "RAIN LIKELY" && mode === "WALK" ? 4 : 0;
+  const peakPenalty =
+    conditions.peakState === "PEAK" && mode === "BUS" ? 3.5 : 0;
+  return score.minutes + costWeight + reliabilityWeight + rainPenalty + peakPenalty;
+};
 
-    return {
-      WALK: {
-        minutes: walkMinutes,
-        reliability: 0.95,
-        cost: MODE_COSTS.WALK,
-      },
-      BUS: {
-        minutes: busMinutes,
-        reliability: busReliability,
-        cost: MODE_COSTS.BUS,
-      },
-      POOL: {
-        minutes: poolMinutes,
-        reliability: 0.8,
-        cost: MODE_COSTS.POOL,
-      },
-      AUTO: {
-        minutes: autoMinutes,
-        reliability: 0.75,
-        cost: MODE_COSTS.AUTO,
-      },
-    };
-  },
+export const scoreRoutes = (origin, destination, conditions = {}) => {
+  const distanceKm = conditions.distanceKm ?? distanceKmBetween(origin, destination);
+  const isPeakHour = conditions.peakState
+    ? conditions.peakState === "PEAK"
+    : RELIABILITY_PEAK_HOURS.includes(conditions.hourOfDay ?? new Date().getHours());
+  const weatherIsWet = conditions.weather === "RAIN LIKELY";
+  const roadTraffic = clamp(conditions.roadTraffic ?? 0.28, 0, 1);
+  const crowdLevel = clamp(conditions.crowdLevel ?? 0.25, 0, 1);
+  const waitMinutes = conditions.waitMinutes ?? {};
+  const speedMultiplier = conditions.speedMultiplier ?? {};
 
-  /**
-   * Recommends the best transportation mode based on distance and scores.
-   * Returns the mode key as a string.
-   */
-  recommend(scores, distanceKm) {
-    // Rule out any mode with reliability < 0.5
-    const validModes = Object.entries(scores).filter(
-      ([_, score]) => score.reliability >= 0.5,
-    );
+  const walkMinutes = minMinutes(
+    (distanceKm / (SPEEDS.WALK * (speedMultiplier.WALK ?? 1))) * 60,
+  );
+  const busMinutes = minMinutes(
+    (distanceKm / (SPEEDS.BUS * (speedMultiplier.BUS ?? 1))) * 60 +
+      (waitMinutes.BUS ?? 4),
+  );
+  const poolMinutes = minMinutes(
+    (distanceKm / (SPEEDS.POOL * (speedMultiplier.POOL ?? 1))) * 60 +
+      (waitMinutes.POOL ?? 2),
+  );
+  const autoMinutes = minMinutes(
+    (distanceKm / (SPEEDS.AUTO * (speedMultiplier.AUTO ?? 1))) * 60 +
+      (waitMinutes.AUTO ?? 2),
+  );
 
-    if (validModes.length === 0) {
-      return "AUTO"; // Fallback if all reliability < 0.5
+  const walkReliability = clamp(
+    0.97 - (weatherIsWet ? 0.16 : 0) - Math.max(0, distanceKm - 1.4) * 0.08,
+    0.48,
+    0.97,
+  );
+  const busReliability = clamp(
+    0.88 -
+      (isPeakHour ? 0.18 : 0) -
+      roadTraffic * 0.16 -
+      (weatherIsWet ? 0.04 : 0) -
+      (distanceKm < 0.7 ? 0.05 : 0),
+    0.45,
+    0.9,
+  );
+  const poolReliability = clamp(
+    0.84 - roadTraffic * 0.12 - crowdLevel * 0.08 + (distanceKm > 1.2 ? 0.03 : 0),
+    0.52,
+    0.88,
+  );
+  const autoReliability = clamp(
+    0.8 -
+      roadTraffic * 0.08 -
+      crowdLevel * 0.05 +
+      ((conditions.hourOfDay ?? 12) >= 20 ? 0.04 : 0.01),
+    0.56,
+    0.86,
+  );
+
+  return {
+    WALK: {
+      minutes: walkMinutes,
+      reliability: walkReliability,
+      cost: MODE_COSTS.WALK,
+      delayRisk: toDelayRisk(walkMinutes, walkReliability, walkMinutes),
+    },
+    BUS: {
+      minutes: busMinutes,
+      reliability: busReliability,
+      cost: MODE_COSTS.BUS,
+      delayRisk: toDelayRisk(busMinutes, busReliability, walkMinutes),
+    },
+    POOL: {
+      minutes: poolMinutes,
+      reliability: poolReliability,
+      cost: MODE_COSTS.POOL,
+      delayRisk: toDelayRisk(poolMinutes, poolReliability, walkMinutes),
+    },
+    AUTO: {
+      minutes: autoMinutes,
+      reliability: autoReliability,
+      cost: MODE_COSTS.AUTO,
+      delayRisk: toDelayRisk(autoMinutes, autoReliability, walkMinutes),
+    },
+  };
+};
+
+export const confidenceLabel = (reliability) => {
+  if (reliability >= 0.84) return "HIGH";
+  if (reliability >= 0.68) return "MODERATE";
+  return "LOW";
+};
+
+export const riskRationale = (mode, routeScores, conditions = {}) => {
+  const distanceKm = conditions.distanceKm ?? 0;
+  const wet = conditions.weather === "RAIN LIKELY";
+  const peak = conditions.peakState === "PEAK";
+  const rationaleSet = RATIONALES[mode];
+
+  if (mode === "WALK") {
+    if (distanceKm <= 0.8) return rationaleSet.short;
+    if (wet) return rationaleSet.wet;
+    return rationaleSet.steady;
+  }
+
+  if (mode === "BUS") {
+    if (peak) return rationaleSet.peak;
+    if (routeScores.BUS.minutes <= routeScores.WALK.minutes - 3) return rationaleSet.fast;
+    return rationaleSet.covered;
+  }
+
+  if (mode === "POOL") {
+    if (routeScores.POOL.reliability >= routeScores.BUS.reliability + 0.08) {
+      return rationaleSet.recovery;
     }
+    if (distanceKm > 1.4) return rationaleSet.efficient;
+    return rationaleSet.reroute;
+  }
 
-    if (distanceKm < 0.5) {
-      // Always WALK for very short distances
-      return validModes.find(([mode]) => mode === "WALK")
-        ? "WALK"
-        : validModes[0][0];
-    }
+  if ((conditions.hourOfDay ?? 12) >= 20) return rationaleSet.late;
+  if (routeScores.AUTO.minutes <= routeScores.BUS.minutes) return rationaleSet.direct;
+  return rationaleSet.fallback;
+};
 
-    if (distanceKm < 1.5) {
-      // WALK if reliable, else BUS if reliable, else AUTO
-      if (scores.WALK.reliability >= 0.9) {
-        return "WALK";
-      }
-      if (scores.BUS.reliability >= 0.6) {
-        return "BUS";
-      }
-      return "AUTO";
-    }
+export const recommendRoute = (routeScores, conditions = {}) => {
+  const distanceKm = conditions.distanceKm ?? 0;
+  const viableModes = Object.entries(routeScores).filter(
+    ([, score]) => score.reliability >= 0.55,
+  );
 
-    // distanceKm >= 1.5: lowest minutes among BUS/POOL/AUTO with reliability >= 0.6
-    const candidates = ["BUS", "POOL", "AUTO"].filter(
-      (mode) => scores[mode].reliability >= 0.6,
-    );
-
-    if (candidates.length === 0) {
-      // If none meet reliability threshold, pick best available
-      return Object.entries(validModes).sort((a, b) =>
-        a[1].minutes > b[1].minutes ? 1 : -1,
+  let mode = "AUTO";
+  if (distanceKm <= 0.55 && routeScores.WALK.reliability >= 0.7) {
+    mode = "WALK";
+  } else if (
+    distanceKm <= 1.2 &&
+    conditions.weather !== "RAIN LIKELY" &&
+    routeScores.WALK.minutes <= routeScores.BUS.minutes + 2
+  ) {
+    mode = "WALK";
+  } else {
+    const candidates = viableModes.length ? viableModes : Object.entries(routeScores);
+    mode = candidates
+      .slice()
+      .sort(
+        ([modeA, scoreA], [modeB, scoreB]) =>
+          scoreCandidate(modeA, scoreA, conditions) -
+          scoreCandidate(modeB, scoreB, conditions),
       )[0][0];
-    }
+  }
 
-    // Return mode with lowest minutes
-    return candidates.reduce((best, mode) =>
-      scores[mode].minutes < scores[best].minutes ? mode : best,
-    );
-  },
+  return {
+    mode,
+    confidence: confidenceLabel(routeScores[mode].reliability),
+    rationale: riskRationale(mode, routeScores, conditions),
+  };
+};
 
-  /**
-   * Returns confidence label based on reliability score.
-   */
-  confidenceLabel(reliability) {
-    if (reliability >= 0.8) return "HIGH";
-    if (reliability >= 0.6) return "MODERATE";
-    return "LOW";
-  },
+export const isGigOnRoute = (startCoords, destCoords, gigCoords) => {
+  const proximityKm = 0.18;
+  const toRad = (value) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
 
-  /**
-   * Returns a one-line rationale string explaining the recommendation.
-   */
-  riskRationale(mode, hourOfDay, reliability) {
-    const isPeakHour = RELIABILITY_PEAK_HOURS.includes(hourOfDay);
-    const rationales = RATIONALES[mode] || [];
+  const lat1 = toRad(startCoords.lat);
+  const lon1 = toRad(startCoords.lon);
+  const lat2 = toRad(destCoords.lat);
+  const lon2 = toRad(destCoords.lon);
+  const lat3 = toRad(gigCoords.lat);
+  const lon3 = toRad(gigCoords.lon);
 
-    if (rationales.length === 0) {
-      return `${mode} is a reasonable choice for this route.`;
-    }
+  const dLon13 = lon3 - lon1;
+  const dLon12 = lon2 - lon1;
+  const y = Math.sin(dLon13) * Math.cos(lat3);
+  const x =
+    Math.cos(lat1) * Math.sin(lat3) -
+    Math.sin(lat1) * Math.cos(lat3) * Math.cos(dLon13);
+  const courseAB = Math.atan2(
+    Math.sin(dLon12) * Math.cos(lat2),
+    Math.cos(lat1) * Math.sin(lat2) -
+      Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon12),
+  );
+  const distanceAC = Math.acos(
+    Math.sin(lat1) * Math.sin(lat3) +
+      Math.cos(lat1) * Math.cos(lat3) * Math.cos(dLon13),
+  );
+  const crossTrackKm =
+    Math.asin(Math.sin(distanceAC) * Math.sin(courseAB - Math.atan2(y, x))) *
+    earthRadiusKm;
 
-    // Select rationale based on reliability and time of day
-    let selected;
-    if (reliability >= 0.8) {
-      // Use optimistic rationale for high reliability
-      selected = rationales[0];
-    } else if (reliability >= 0.6) {
-      // Use moderate rationale
-      selected = rationales[1] || rationales[0];
-    } else {
-      // Use cautionary rationale for low reliability
-      selected = rationales[2] || rationales[1] || rationales[0];
-    }
+  return Math.abs(crossTrackKm) <= proximityKm;
+};
 
-    return selected || `${mode} has mixed reliability on this route.`;
-  },
-
-  /**
-   * Checks if a gig location is within 0.15 km of the route.
-   * Uses perpendicular distance from point to line segment.
-   */
-  isGigOnRoute(startCoords, destCoords, gigCoords) {
-    const PROXIMITY_KM = 0.15;
-
-    // Convert coordinates to radians and use haversine-based projection
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // Earth radius in km
-
-    const lat1 = toRad(startCoords.lat);
-    const lon1 = toRad(startCoords.lon);
-    const lat2 = toRad(destCoords.lat);
-    const lon2 = toRad(destCoords.lon);
-    const lat3 = toRad(gigCoords.lat);
-    const lon3 = toRad(gigCoords.lon);
-
-    // Calculate cross-track distance using spherical geometry
-    const dLon13 = lon3 - lon1;
-    const dLon12 = lon2 - lon1;
-
-    const y = Math.sin(dLon13) * Math.cos(lat3);
-    const x =
-      Math.cos(lat1) * Math.sin(lat3) -
-      Math.sin(lat1) * Math.cos(lat3) * Math.cos(dLon13);
-    const crsAB = Math.atan2(
-      Math.sin(dLon12) * Math.cos(lat2),
-      Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon12),
-    );
-
-    const dAC = Math.acos(
-      Math.sin(lat1) * Math.sin(lat3) +
-        Math.cos(lat1) * Math.cos(lat3) * Math.cos(dLon13),
-    );
-    const crossTrackDistance =
-      Math.asin(Math.sin(dAC) * Math.sin(crsAB - Math.atan2(y, x))) * R;
-
-    return Math.abs(crossTrackDistance) <= PROXIMITY_KM;
-  },
+const RouteEngine = {
+  confidenceLabel,
+  isGigOnRoute,
+  recommendRoute,
+  riskRationale,
+  scoreRoutes,
 };
 
 export default RouteEngine;

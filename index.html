@@ -5,7 +5,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta
       name="description"
-      content="Tracklet helps students navigate campus with smart commute options, route timing, autopool seats, and live event suggestions."
+      content="Tracklet helps students compare campus commute options with clearer routing, timing confidence, and route-aware extras."
     />
     <meta name="theme-color" content="#CCFF00" />
     <link rel="manifest" href="manifest.json" />
@@ -25,15 +25,15 @@
         theme: {
           extend: {
             colors: {
-              primary: "#CCFF00", // Lime Green
-              secondary: "#FF90E8", // Hot Pink for accents
-              tertiary: "#51E5FF", // Cyan
-              "neo-bg": "#FFF4E0", // Off-white/Cream
-              "neo-dark": "#1a1a1a", // Soft Black for dark mode bg
-              "neo-card": "#ffffff", // White
-              "neo-card-dark": "#2d2d2d", // Dark grey
+              primary: "#CCFF00",
+              secondary: "#FF90E8",
+              tertiary: "#51E5FF",
+              "neo-bg": "#FFF4E0",
+              "neo-dark": "#1A1A1A",
+              "neo-card": "#FFFFFF",
+              "neo-card-dark": "#2D2D2D",
               "neo-border": "#000000",
-              "neo-border-dark": "#ffffff",
+              "neo-border-dark": "#FFFFFF",
             },
             fontFamily: {
               display: ["Archivo Black", "sans-serif"],
@@ -41,9 +41,8 @@
               mono: ["Space Mono", "monospace"],
             },
             boxShadow: {
-              neo: "4px 4px 0px 0px #000000",
-              "neo-sm": "2px 2px 0px 0px #000000",
-              "neo-dark": "4px 4px 0px 0px #ffffff",
+              neo: "4px 4px 0 0 #000000",
+              "neo-sm": "2px 2px 0 0 #000000",
             },
             borderWidth: {
               3: "3px",
@@ -51,14 +50,9 @@
           },
         },
       };
-      // Load theme preference
       (function () {
         const theme = localStorage.getItem("tracklet-theme") || "light";
-        if (theme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
+        document.documentElement.classList.toggle("dark", theme === "dark");
       })();
     </script>
     <style>
@@ -81,43 +75,26 @@
           linear-gradient(0deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
       }
-      .dark .shadow-neo {
-        box-shadow: 4px 4px 0px 0px #ffffff;
-      }
-      .dark .shadow-neo-sm {
-        box-shadow: 2px 2px 0px 0px #ffffff;
-      }
-      .interactive-card {
-        transition:
-          transform 180ms cubic-bezier(0.2, 0.9, 0.2, 1),
-          box-shadow 180ms cubic-bezier(0.2, 0.9, 0.2, 1),
-          background-color 180ms ease,
-          color 180ms ease,
-          opacity 180ms ease;
-        will-change: transform;
-      }
-      .interactive-card.is-pressed {
-        transform: translateY(1px) scale(0.995);
-      }
-      .interactive-card.is-selected {
-        transform: translateY(-1px);
-      }
+      .interactive-card,
       .pressable {
         transition:
-          transform 140ms ease,
-          box-shadow 140ms ease,
-          background-color 140ms ease,
-          color 140ms ease;
+          transform 160ms ease,
+          box-shadow 160ms ease,
+          background-color 160ms ease,
+          color 160ms ease,
+          opacity 160ms ease;
       }
+      .interactive-card:hover,
+      .pressable:hover {
+        transform: translateY(-1px);
+      }
+      .interactive-card:active,
       .pressable:active {
-        transform: translateY(1px) scale(0.98);
-      }
-      .pressable.is-pressed {
-        transform: translateY(1px) scale(0.98);
+        transform: translateY(1px) scale(0.99);
       }
       .animate-in {
-        animation: float-in 420ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
-        animation-delay: calc(var(--stagger, 0) * 60ms);
+        animation: float-in 360ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+        animation-delay: calc(var(--stagger, 0) * 55ms);
       }
       @keyframes float-in {
         from {
@@ -130,21 +107,21 @@
         }
       }
       @media (prefers-reduced-motion: no-preference) {
+        .skeleton {
+          animation: skeleton-pulse 1.2s ease-in-out infinite;
+        }
         @keyframes skeleton-pulse {
           0%,
           100% {
             opacity: 1;
           }
           50% {
-            opacity: 0.4;
+            opacity: 0.55;
           }
-        }
-        .skeleton {
-          animation: skeleton-pulse 1.2s ease-in-out infinite;
         }
       }
       .pulse-update {
-        animation: pulse-flash 260ms ease;
+        animation: pulse-flash 240ms ease;
       }
       @keyframes pulse-flash {
         0% {
@@ -159,22 +136,42 @@
       }
       .reliability-bar {
         height: 4px;
-        background-color: theme("colors.gray.200");
-        border: none;
+        background-color: #e5e7eb;
         border-radius: 2px;
         overflow: hidden;
       }
       .dark .reliability-bar {
-        background-color: theme("colors.gray.600");
+        background-color: #4b5563;
+      }
+      .option-card-selected {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      .dark .option-card-selected {
+        background-color: #ffffff;
+        color: #000000;
       }
       body {
-        min-height: max(884px, 100dvh);
+        min-height: 100dvh;
       }
-      .pressable:focus-visible,
       button:focus-visible,
-      input:focus-visible {
+      input:focus-visible,
+      select:focus-visible,
+      [role="radio"]:focus-visible,
+      [role="radiogroup"]:focus-visible {
         outline: 3px solid #51e5ff;
         outline-offset: 2px;
+      }
+      @media (max-width: 380px) {
+        #decision-mode {
+          font-size: 2.45rem;
+        }
+        #event-title {
+          font-size: 1.85rem;
+        }
+        #options-grid {
+          gap: 0.625rem;
+        }
       }
     </style>
   </head>
@@ -182,10 +179,10 @@
     class="bg-neo-bg dark:bg-neo-dark neo-pattern font-body text-black dark:text-white transition-colors duration-200 antialiased overflow-x-hidden"
   >
     <div
-      class="max-w-md mx-auto min-h-screen relative pb-24 border-x-3 border-neo-border dark:border-neo-border-dark bg-neo-bg dark:bg-neo-dark"
+      class="max-w-md mx-auto min-h-screen relative pb-32 border-x-3 border-neo-border dark:border-neo-border-dark bg-neo-bg dark:bg-neo-dark"
     >
       <header
-        class="flex items-center justify-between px-4 py-3 border-b-3 border-neo-border dark:border-neo-border-dark bg-white dark:bg-neo-card-dark sticky top-0 z-50"
+        class="flex items-center justify-between px-4 py-3 border-b-3 border-neo-border dark:border-neo-border-dark bg-white dark:bg-neo-card-dark sticky top-0 z-40"
       >
         <div class="flex items-center gap-3">
           <div
@@ -208,10 +205,12 @@
             </p>
           </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
           <button
             id="theme-toggle"
-            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center hover:bg-primary transition-colors shadow-neo-sm"
+            type="button"
+            class="pressable w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center bg-white dark:bg-neo-card-dark shadow-neo-sm"
+            aria-label="Toggle theme"
           >
             <span
               id="theme-icon"
@@ -219,584 +218,601 @@
               >dark_mode</span
             >
           </button>
-          <button
-            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center hover:bg-secondary transition-colors shadow-neo-sm"
+          <div
+            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center bg-white/70 dark:bg-neo-card-dark/70 opacity-80"
+            aria-hidden="true"
           >
             <span
               class="material-icons-outlined text-black dark:text-white text-lg"
               >notifications</span
             >
-          </button>
+          </div>
         </div>
       </header>
+
       <main class="p-4 space-y-4">
-        <div
-          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-3 shadow-neo"
+        <section
+          class="animate-in border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
+          style="--stagger: 0"
+          aria-label="Route controls"
         >
-          <div class="flex items-center gap-2">
-            <div
-              class="w-10 h-10 bg-primary border-3 border-black flex items-center justify-center rounded-md shadow-neo-sm"
-            >
-              <span class="material-icons-outlined text-black text-lg"
-                >search</span
+          <div class="flex items-start justify-between mb-4 gap-3">
+            <div>
+              <p
+                class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300"
               >
+                Trip planner
+              </p>
+              <h2 class="font-display text-2xl uppercase leading-none">
+                Set your route
+              </h2>
             </div>
-            <div class="flex-1 relative">
+            <span
+              class="bg-primary border-2 border-black px-2 py-1 text-[9px] font-mono font-bold uppercase text-black shadow-neo-sm"
+              >Live</span
+            >
+          </div>
+          <div
+            class="grid grid-cols-[1fr_1.2fr_auto] gap-2 items-end max-[430px]:grid-cols-1"
+          >
+            <div>
               <label
+                for="origin-select"
                 class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
-                for="destination-search"
+                >Origin</label
               >
-                Destination
-              </label>
+              <select
+                id="origin-select"
+                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white px-2 py-2 font-mono text-[11px] uppercase"
+              >
+                <option>MBH I</option>
+                <option selected>MBH II</option>
+                <option>LH</option>
+                <option>GH</option>
+                <option>Main Building</option>
+                <option>SAC</option>
+                <option>Central Plaza</option>
+              </select>
+            </div>
+            <div class="relative">
+              <label
+                for="destination-search"
+                class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
+                >Destination</label
+              >
               <input
                 id="destination-search"
-                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black px-3 py-2 font-mono text-xs uppercase placeholder:text-gray-400 focus:outline-none"
+                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white px-3 py-2 font-mono text-[11px] uppercase placeholder:text-gray-400"
                 placeholder="Where are you going?"
                 value="Central Library"
+                maxlength="34"
               />
               <ul
                 id="autocomplete-list"
-                class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white shadow-neo mt-1 hidden max-h-48 overflow-y-auto"
+                class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white rounded-md shadow-neo mt-1 hidden max-h-56 overflow-y-auto overflow-x-hidden"
               ></ul>
             </div>
             <button
-              class="bg-black text-white dark:bg-white dark:text-black border-2 border-black px-3 py-2 font-mono text-[10px] uppercase shadow-neo-sm"
+              id="go-button"
+              type="button"
+              class="pressable bg-black text-white dark:bg-white dark:text-black border-2 border-black dark:border-white px-3 py-2 font-mono text-[10px] uppercase shadow-neo-sm max-[430px]:w-full"
             >
-              Go
+              Refresh
             </button>
           </div>
-        </div>
-
-        <div id="history-strip" class="hidden">
-          <div class="flex gap-2 overflow-x-auto hide-scroll pb-1"></div>
-        </div>
-        <div
-          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
-        >
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-3">
+          <div class="grid grid-cols-2 gap-2 mt-3 max-[430px]:grid-cols-1">
+            <div
+              class="border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-2 py-1.5"
+            >
               <p
-                class="font-display text-2xl uppercase tracking-wide text-black dark:text-white"
+                class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
               >
-                Good morning, Shashank
+                Current time
               </p>
+              <span
+                id="live-clock"
+                class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300"
+              ></span>
             </div>
             <div
-              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
+              class="border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-2 py-1.5"
             >
-              Destination: Central Library
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="bg-primary border-3 border-black dark:border-white rounded-xl p-5 shadow-neo relative overflow-hidden group skeleton"
-          data-confidence="HIGH"
-        >
-          <div class="absolute right-4 top-4">
-            <div
-              class="w-12 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-neo-sm"
-            >
-              <span class="material-icons-outlined text-2xl text-black"
-                >north_east</span
+              <p
+                class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
               >
+                Active route
+              </p>
+              <span
+                id="dest-label"
+                class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 truncate block"
+              >
+                MBH II to Central Library
+              </span>
             </div>
           </div>
+          <div id="history-strip" class="hidden mt-3">
+            <p
+              class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400 mb-2"
+            >
+              Recent picks
+            </p>
+            <div id="history-chips" class="flex flex-wrap gap-2"></div>
+          </div>
+        </section>
 
+        <section
+          id="decision-card"
+          class="animate-in bg-primary border-3 border-black dark:border-white rounded-xl p-5 shadow-neo"
+          style="--stagger: 1"
+          aria-live="polite"
+        >
           <div class="mb-2">
             <span
               class="bg-white border-2 border-black px-2 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm inline-block"
+              >Recommended</span
             >
-              Recommended
-            </span>
           </div>
-
-          <h3
-            class="font-display text-5xl uppercase leading-none mb-3 text-black tracking-tighter mt-3"
+          <h2
+            id="decision-mode"
+            class="font-display text-5xl uppercase leading-none mb-3 text-black tracking-tighter"
           >
             WALK
-          </h3>
-
-          <div class="h-5 mb-3 flex gap-1">
+          </h2>
+          <div class="h-5 mb-3 flex gap-2">
             <div
-              class="w-1 h-5 bg-black dark:bg-white border-2 border-black"
+              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
             ></div>
             <div
-              class="w-1 h-5 bg-black dark:bg-white border-2 border-black"
+              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
             ></div>
             <div
-              class="w-1 h-5 bg-black dark:bg-white border-2 border-black"
+              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
             ></div>
             <div
-              class="w-1 h-5 bg-gray-200 dark:bg-gray-600 border-2 border-black"
+              class="confidence-segment w-5 h-5 bg-gray-200 border-2 border-black"
             ></div>
             <div
-              class="w-1 h-5 bg-gray-200 dark:bg-gray-600 border-2 border-black"
+              class="confidence-segment w-5 h-5 bg-gray-200 border-2 border-black"
             ></div>
           </div>
-
-          <div class="mb-4">
+          <div class="flex items-center gap-2 flex-wrap mb-3">
             <div
-              class="bg-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase text-black shadow-neo-sm"
-            >
-              ETA 7:50–7:55 AM · leave within 5 min
-            </div>
+              id="arrival-summary"
+              class="bg-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase text-black shadow-neo-sm flex-1"
+            ></div>
             <div
               id="spare-time-badge"
-              class="mt-2 bg-green-400 border-2 border-black px-3 py-1 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm inline-block"
-            >
-              8 MIN SPARE
-            </div>
-            <p
-              id="risk-rationale"
-              class="font-mono text-[10px] uppercase text-black mt-2"
-            >
-              Walking time is highly predictable at this distance.
-            </p>
+              class="bg-green-400 border-2 border-black px-2 py-2 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm whitespace-nowrap"
+            ></div>
           </div>
-
+          <p
+            id="risk-rationale"
+            class="font-mono text-[10px] uppercase text-black mb-3"
+          ></p>
           <div class="flex flex-wrap gap-2">
             <div
               class="bg-secondary border-2 border-black px-3 py-1.5 font-bold text-xs uppercase flex items-center gap-1 text-black shadow-neo-sm"
             >
               <span class="material-icons-outlined text-sm">warning</span>
-              Delay risk: medium
+              <span id="delay-chip-text">Delay risk: medium</span>
             </div>
             <div
-              class="bg-white border-2 border-black px-3 py-1.5 font-bold text-xs uppercase text-black shadow-neo-sm"
+              class="bg-white border-2 border-black px-3 py-1.5 font-bold text-xs uppercase text-black shadow-neo-sm flex items-center gap-1"
             >
               <span class="material-icons-outlined text-sm">water_drop</span>
-              Rain: likely
+              <span id="weather-chip-text">Weather: clear</span>
             </div>
           </div>
-        </div>
-        <div>
+        </section>
+
+        <section class="animate-in" style="--stagger: 2">
           <h2
+            id="options-heading"
             class="font-mono text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2"
           >
             Options to Central Library
           </h2>
-          <div class="grid grid-cols-3 gap-2 skeleton">
+          <div id="options-grid" class="grid grid-cols-2 gap-3">
             <div
-              class="bg-black border-3 border-black dark:border-white rounded-lg py-2 px-1 relative shadow-neo-sm flex flex-col items-center justify-center text-white cursor-pointer transform hover:-translate-y-1 transition-transform col-span-2"
               data-mode="WALK"
+              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
             >
               <div
-                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
-                id="rec-badge-walk"
+                data-role="rec-badge"
+                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
               >
                 REC
               </div>
-              <span class="material-icons-outlined text-2xl mb-1"
+              <span class="material-icons-outlined text-2xl"
                 >directions_walk</span
               >
               <div class="font-display text-lg leading-none">WALK</div>
-              <div class="font-mono text-[10px] text-gray-300 mt-1">10 MIN</div>
-              <div class="reliability-bar w-8 mt-2" data-reliability="0.95">
+              <div data-role="time" class="font-mono text-[11px] mt-1">
+                10 MIN
+              </div>
+              <div class="reliability-bar w-12 mt-1">
                 <div
+                  data-role="reliability-fill"
                   class="h-full bg-black dark:bg-white"
                   style="width: 95%"
                 ></div>
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="BUS"
+              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
             >
               <div
-                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
-                id="rec-badge-bus"
+                data-role="rec-badge"
+                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
               >
                 REC
               </div>
-              <span class="material-icons-outlined text-2xl mb-1"
+              <span class="material-icons-outlined text-2xl"
                 >directions_bus</span
               >
               <div class="font-display text-lg leading-none">BUS</div>
-              <div
-                class="font-mono text-[10px] text-gray-700 dark:text-gray-300 mt-1"
-              >
+              <div data-role="time" class="font-mono text-[11px] mt-1">
                 15 MIN
               </div>
-              <div class="reliability-bar w-8 mt-2" data-reliability="0.85">
+              <div class="reliability-bar w-12 mt-1">
                 <div
+                  data-role="reliability-fill"
                   class="h-full bg-black dark:bg-white"
-                  style="width: 85%"
+                  style="width: 82%"
                 ></div>
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="POOL"
+              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
             >
               <div
-                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
-                id="rec-badge-pool"
+                data-role="rec-badge"
+                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
               >
                 REC
               </div>
-              <span class="material-icons-outlined text-2xl mb-1"
-                >directions_car</span
-              >
+              <span class="material-icons-outlined text-2xl">diversity_3</span>
               <div class="font-display text-lg leading-none">POOL</div>
-              <div
-                class="font-mono text-[10px] text-gray-700 dark:text-gray-300 mt-1"
-              >
+              <div data-role="time" class="font-mono text-[11px] mt-1">
                 12 MIN
               </div>
-              <div class="reliability-bar w-8 mt-2" data-reliability="0.80">
+              <div class="reliability-bar w-12 mt-1">
                 <div
+                  data-role="reliability-fill"
                   class="h-full bg-black dark:bg-white"
-                  style="width: 80%"
+                  style="width: 78%"
                 ></div>
-              </div>
-              <div
-                class="font-mono text-[9px] uppercase mt-1 text-gray-600 dark:text-gray-400"
-              >
-                ● ● ○
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="AUTO"
+              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
             >
               <div
-                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
-                id="rec-badge-auto"
+                data-role="rec-badge"
+                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
               >
                 REC
               </div>
-              <span class="material-icons-outlined text-2xl mb-1"
-                >directions_car</span
-              >
+              <span class="material-icons-outlined text-2xl">local_taxi</span>
               <div class="font-display text-lg leading-none">AUTO</div>
-              <div
-                class="font-mono text-[10px] text-gray-700 dark:text-gray-300 mt-1"
-              >
+              <div data-role="time" class="font-mono text-[11px] mt-1">
                 14 MIN
               </div>
-              <div class="reliability-bar w-8 mt-2" data-reliability="0.75">
+              <div class="reliability-bar w-12 mt-1">
                 <div
+                  data-role="reliability-fill"
                   class="h-full bg-black dark:bg-white"
-                  style="width: 75%"
+                  style="width: 74%"
                 ></div>
-              </div>
-              <div
-                class="font-mono text-[9px] uppercase mt-1 text-gray-600 dark:text-gray-400"
-              >
-                ● ● ●
               </div>
             </div>
           </div>
           <div
             id="mode-detail"
-            class="hidden mt-3 border-2 border-black dark:border-white bg-white dark:bg-neo-card-dark px-3 py-2 font-mono text-[10px] uppercase text-black dark:text-white shadow-neo-sm"
+            class="hidden mt-3 border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-3 py-3 text-black dark:text-white shadow-neo-sm"
+          >
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <h3
+                class="font-display text-base uppercase leading-none tracking-tight"
+              >
+                Alternative mode insights
+              </h3>
+              <span
+                class="border-2 border-black dark:border-white px-2 py-0.5 font-mono text-[8px] uppercase"
+                >comparison</span
+              >
+            </div>
+            <p
+              id="mode-detail-summary"
+              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
+            ></p>
+            <div class="grid grid-cols-2 gap-2 mt-2 max-[430px]:grid-cols-1">
+              <div
+                class="border-2 border-black dark:border-white bg-white dark:bg-[#1f1f1f] px-2 py-2"
+              >
+                <p
+                  class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
+                >
+                  Selected
+                </p>
+                <p
+                  id="mode-detail-selected"
+                  class="font-mono text-[10px] uppercase font-bold"
+                ></p>
+              </div>
+              <div
+                class="border-2 border-black dark:border-white bg-primary text-black px-2 py-2"
+              >
+                <p class="font-mono text-[8px] uppercase opacity-70">
+                  Recommended
+                </p>
+                <p
+                  id="mode-detail-recommended"
+                  class="font-mono text-[10px] uppercase font-bold"
+                ></p>
+              </div>
+            </div>
+            <p
+              id="mode-detail-tip"
+              class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-2"
+            ></p>
+          </div>
+        </section>
+
+        <div
+          class="animate-in flex items-center gap-3 my-1"
+          style="--stagger: 4"
+        >
+          <div
+            class="flex-1 border-t-2 border-black dark:border-white opacity-20"
+          ></div>
+          <span
+            class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
+            >More options</span
+          >
+          <div
+            class="flex-1 border-t-2 border-black dark:border-white opacity-20"
           ></div>
         </div>
-        <div
-          class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo skeleton"
-        >
-          <div class="flex justify-between items-center mb-3">
-            <h2 class="font-display text-lg uppercase">Route</h2>
-            <button
-              class="bg-black text-white dark:bg-white dark:text-black p-1 rounded-full"
-            >
-              <span class="material-icons-outlined text-sm">open_in_full</span>
-            </button>
-          </div>
-          <svg
-            viewBox="0 0 320 80"
-            class="w-full h-auto"
-            data-start="MBH II"
-            data-dest="Central Library"
+
+        <section id="secondary-options" class="space-y-4">
+          <div
+            class="animate-in border-2 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-lg px-3 py-2"
+            style="--stagger: 5"
           >
-            <!-- Background path (total distance) -->
-            <path
-              d="M 20 60 Q 170 40 300 20"
-              stroke="#000"
-              stroke-width="3"
-              fill="none"
-              class="dark:stroke-white"
-            />
-            <!-- Progress path (revealed distance) -->
-            <path
-              d="M 20 60 Q 170 40 300 20"
-              stroke="#CCFF00"
-              stroke-width="3"
-              fill="none"
-              class="reveal dark:stroke-white"
-              style="stroke-dasharray: 100; stroke-dashoffset: 34"
-            />
-            <!-- Start node -->
-            <circle
-              cx="20"
-              cy="60"
-              r="7"
-              fill="white"
-              class="dark:fill-neo-card-dark"
-              stroke="#000"
-              stroke-width="2.5"
-              class="dark:stroke-white"
-            />
-            <!-- Midpoint node -->
-            <circle
-              cx="160"
-              cy="40"
-              r="7"
-              fill="white"
-              class="dark:fill-neo-card-dark"
-              stroke="#000"
-              stroke-width="2.5"
-              class="dark:stroke-white"
-            />
-            <!-- Destination node -->
-            <circle
-              cx="300"
-              cy="20"
-              r="7"
-              fill="white"
-              class="dark:fill-neo-card-dark"
-              stroke="#000"
-              stroke-width="2.5"
-              class="dark:stroke-white"
-            />
-            <!-- Progress indicator -->
-            <circle
-              id="route-progress"
-              cx="200"
-              cy="33"
-              r="5"
-              fill="#CCFF00"
-              stroke="#000"
-              stroke-width="2"
-            />
-            <!-- Labels -->
-            <text
-              x="20"
-              y="75"
-              font-family="Space Mono"
-              font-size="9"
-              text-anchor="middle"
-              class="font-mono uppercase text-[9px] fill-black dark:fill-white"
+            <h2 class="font-display text-lg uppercase leading-none">
+              Route add-ons
+            </h2>
+            <p
+              class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1"
             >
-              Start
-            </text>
-            <text
-              x="300"
-              y="75"
-              font-family="Space Mono"
-              font-size="9"
-              text-anchor="middle"
-              class="font-mono uppercase text-[9px] fill-black dark:fill-white"
-            >
-              Destination
-            </text>
-          </svg>
-        </div>
-        <div id="autopool-section">
-          <div class="flex justify-between items-center mb-3">
-            <div>
-              <h2 class="font-display text-xl uppercase">
-                Autopool to Central Library
-              </h2>
-              <p
-                class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
-              >
-                Seats and time impact
-              </p>
-            </div>
+              Optional extras you can do while heading to your destination.
+            </p>
           </div>
-          <div class="flex gap-4 overflow-x-auto hide-scroll pb-2">
+          <div
+            id="autopool-section"
+            class="animate-in border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
+            style="--stagger: 6"
+          >
+            <div class="flex justify-between items-center mb-3 gap-3">
+              <div>
+                <h2
+                  id="autopool-heading"
+                  class="font-display text-xl uppercase"
+                >
+                  Autopool to Central Library
+                </h2>
+                <p
+                  class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
+                >
+                  Optional shared ride match
+                </p>
+              </div>
+              <span
+                id="autopool-status-badge"
+                class="bg-primary border-2 border-black text-[10px] font-bold uppercase px-2 py-1 text-black shadow-neo-sm"
+                >Available</span
+              >
+            </div>
             <div
-              class="min-w-[240px] bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-xl p-4 shadow-neo flex-shrink-0"
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-xl p-4 shadow-neo-sm"
             >
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-8 h-8 rounded-full bg-gray-200 border-2 border-black overflow-hidden"
+              <div class="flex items-start justify-between mb-3 gap-3">
+                <div>
+                  <p id="autopool-name" class="font-bold text-sm leading-none">
+                    Sarah K.
+                  </p>
+                  <p
+                    id="autopool-meta"
+                    class="text-xs text-gray-500 dark:text-gray-300"
                   >
-                    <img
-                      alt="Driver"
-                      class="w-full h-full object-cover"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6nMiQizm8l82MSPVDDJBLaiLYFgmMTNjMGKhNHRkD1LjWxpiiEMryNsEoxUt2wt6mNKhmC2tm_B9rOxmDa0EuMJ5-tne6zEOnr-vh8YcY8apHAfDfR-IS7svzlj8iLmuESx8AftRV7QCqfx99gYyLoEahh_HmPOPLD5O_RHF_V8_XUa21FRuNJrl0vR3aJCrVfv6o1Ve3fjErOe8akjfj0DZNgWcIe5Wi3AeWjJ8Z9vhD3ngOHW2n3YnXj1eA8ri3g7LL-V0LmyQ"
-                    />
-                  </div>
-                  <div>
-                    <p class="font-bold text-sm leading-none">Sarah K.</p>
-                    <p class="text-xs text-gray-500">Biology ’26</p>
-                  </div>
+                    Biology 26
+                  </p>
+                  <p
+                    id="autopool-pickup"
+                    class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1"
+                  >
+                    Hatchback | pickup in 3 min
+                  </p>
                 </div>
                 <span
-                  class="bg-primary border-2 border-black text-[10px] font-bold uppercase px-2 py-1 text-black shadow-neo-sm"
+                  class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300"
+                  >Live mock data</span
                 >
-                  Available
-                </span>
               </div>
               <div
                 class="bg-black text-white border-2 border-black px-3 py-2 font-display text-lg leading-none flex items-baseline justify-between mb-2"
               >
-                <span>2 seats</span>
-                <span class="font-mono text-xs">+2 min</span>
-              </div>
-              <div class="font-mono text-[10px] uppercase mb-3 text-gray-600">
-                Backup option
-              </div>
-              <button
-                class="w-full bg-black text-white dark:bg-white dark:text-black font-display uppercase py-2 text-sm hover:bg-secondary hover:text-black transition-colors border-2 border-black"
-              >
-                Join ride
-              </button>
-            </div>
-            <div
-              class="min-w-[200px] bg-secondary border-3 border-black dark:border-white rounded-xl p-4 shadow-neo flex-shrink-0 flex items-center justify-center"
-            >
-              <div class="text-center">
-                <span class="material-icons-outlined text-4xl text-black mb-2"
-                  >add_circle_outline</span
+                <span id="autopool-seats">2 seats</span>
+                <span id="autopool-impact" class="font-mono text-xs"
+                  >+2 min</span
                 >
-                <p class="font-display uppercase text-black">Offer<br />Ride</p>
               </div>
-            </div>
-          </div>
-        </div>
-        <div
-          id="gig-section"
-          class="bg-[#ffb6c1] dark:bg-[#7e3a44] border-3 border-black dark:border-white rounded-xl p-4 shadow-neo overflow-hidden"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div>
-              <span
-                class="bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-mono text-[9px] font-bold uppercase border-2 border-black dark:border-white"
+              <div
+                class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-300"
               >
-                Quick task
-              </span>
-              <div class="font-mono text-[9px] uppercase mt-2 text-gray-800">
-                On your route to Central Library
+                You can also create your own pooling option below.
+              </div>
+              <div class="mt-3 border-t-2 border-black dark:border-white pt-3">
+                <p
+                  class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300 mb-2"
+                >
+                  More nearby pools
+                </p>
+                <div id="autopool-offer-list" class="space-y-2"></div>
+                <button
+                  id="add-pooling-button"
+                  type="button"
+                  class="pressable mt-3 w-full border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-[#1f1f1f] px-3 py-2 font-mono text-[10px] uppercase font-bold text-black dark:text-white shadow-neo-sm"
+                >
+                  Add your own pooling
+                </button>
               </div>
             </div>
-            <span
-              class="bg-white dark:bg-black text-black dark:text-white border-2 border-black dark:border-white px-2 py-1 font-mono text-[9px] font-bold uppercase"
-            >
-              Optional
-            </span>
           </div>
-          <h3 class="font-display text-xl leading-none mb-1">Deliver Coffee</h3>
-          <p class="font-mono text-xs mb-1 text-gray-800">
-            Drop near Central Library · ₹30
-          </p>
-          <p class="font-mono text-[10px] uppercase text-gray-700">
-            Adds ~4 min to your route
-          </p>
-          <div class="flex justify-end mt-4">
-            <button
-              class="bg-transparent text-black dark:text-white border-2 border-black dark:border-white px-4 py-1 font-display uppercase text-sm hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-neo-sm"
-            >
-              Add to route
-            </button>
-          </div>
-        </div>
-        <div
-          id="event-section"
-          class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white p-4 shadow-neo relative mt-8 mb-4"
-        >
-          <h2
-            class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary border-2 border-black px-4 py-1 font-mono text-xs font-bold uppercase text-black rotate-1"
-          >
-            Happening Today
-          </h2>
+
           <div
-            class="border-2 border-black p-4 mt-2 bg-[#fff9ef] dark:bg-neo-card-dark"
+            id="gig-section"
+            class="animate-in bg-[#FFB6C1] dark:bg-[#7E3A44] border-3 border-black dark:border-white rounded-xl p-4 shadow-neo overflow-hidden"
+            style="--stagger: 7"
           >
-            <div class="flex items-start justify-between mb-2">
-              <h3 class="font-display text-2xl uppercase leading-none">
-                Campus Market
-              </h3>
+            <div class="flex items-start justify-between mb-3 gap-3">
+              <div>
+                <span
+                  class="bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-mono text-[9px] font-bold uppercase border-2 border-black dark:border-white"
+                  >Optional micro-gig</span
+                >
+                <div
+                  id="gig-route-line"
+                  class="font-mono text-[9px] uppercase mt-2 text-gray-800 dark:text-gray-100"
+                >
+                  Can be done while going to Central Library
+                </div>
+              </div>
               <span
-                class="bg-tertiary border-2 border-black px-2 py-1 font-mono text-[10px] font-bold uppercase text-black"
+                class="font-mono text-[9px] uppercase text-gray-800 dark:text-gray-100"
+                >Optional</span
               >
-                Today
-              </span>
             </div>
-            <div class="font-mono text-xs font-bold uppercase mb-1">
-              Central Plaza · 12:00 PM · 6 min from Central Library
-            </div>
-            <div
-              class="bg-black text-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase mb-3"
+            <h3 id="gig-title" class="font-display text-xl leading-none mb-1">
+              Deliver coffee
+            </h3>
+            <p
+              id="gig-detail"
+              class="font-mono text-xs mb-1 text-gray-800 dark:text-gray-200"
             >
-              Best way: Walk · 6 min from Central Library
-            </div>
-            <button
-              class="w-full bg-black text-white dark:bg-white dark:text-black px-3 py-2 font-display uppercase text-sm border-2 border-black shadow-neo-sm hover:bg-primary hover:text-black transition-colors"
+              Central Library | Rs 30
+            </p>
+            <p
+              id="gig-impact"
+              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
             >
-              View Walk Route
-            </button>
+              Optional add-on: about 4 extra min
+            </p>
           </div>
-        </div>
+
+          <div
+            id="event-section"
+            class="animate-in bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white p-4 shadow-neo"
+            style="--stagger: 8"
+          >
+            <div
+              class="border-2 border-black p-4 bg-[#FFF9EF] dark:bg-neo-card-dark"
+            >
+              <div class="flex items-start justify-between mb-2 gap-2">
+                <h3
+                  id="event-title"
+                  class="font-display text-2xl uppercase leading-none"
+                >
+                  Campus Market
+                </h3>
+                <span
+                  id="event-tag"
+                  class="bg-primary border-2 border-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
+                  >Today</span
+                >
+              </div>
+              <div
+                id="event-meta"
+                class="font-mono text-xs font-bold uppercase mb-1"
+              >
+                Central Plaza | 12:00 PM | 0.6 km from Central Library
+              </div>
+              <div
+                id="event-best"
+                class="bg-black text-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase mb-3"
+              >
+                Best way: WALK | 6 min from Central Library
+              </div>
+              <div
+                class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-300"
+              >
+                Event route preview is shown here without launching a separate
+                flow.
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
       <nav
-        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-neo-card-dark border-t-3 border-neo-border dark:border-neo-border-dark py-3 px-6 z-50"
+        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-neo-card-dark border-t-3 border-neo-border dark:border-neo-border-dark pt-4 px-6 z-40"
+        style="padding-bottom: calc(1rem + env(safe-area-inset-bottom))"
+        aria-label="Primary navigation"
       >
         <div class="flex justify-between items-center">
-          <button
-            class="flex flex-col items-center gap-1 text-black dark:text-white group"
-            style="--stagger: 0"
+          <div
+            class="flex flex-col items-center gap-1 text-black dark:text-white"
           >
             <div
-              class="w-12 h-8 bg-primary border-2 border-black dark:border-white rounded-full flex items-center justify-center transition-transform group-active:scale-95"
+              class="w-12 h-9 bg-primary border-2 border-black dark:border-white rounded-full flex items-center justify-center"
             >
               <span class="material-icons-outlined text-black text-lg"
                 >home</span
               >
             </div>
-            <span
-              class="font-mono text-[8px] uppercase text-black dark:text-white"
-              >Home</span
-            >
-          </button>
-          <button
-            class="flex flex-col items-center gap-1 text-gray-400 group"
-            style="--stagger: 1"
+            <span class="font-mono text-[8px] uppercase">Home</span>
+          </div>
+          <div
+            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
           >
-            <span
-              class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
-              >map</span
-            >
-            <span class="font-mono text-[8px] uppercase text-gray-400"
-              >Map</span
-            >
-          </button>
-          <button
-            class="flex flex-col items-center gap-1 text-gray-400 group"
-            style="--stagger: 2"
+            <div class="w-12 h-9 rounded-full flex items-center justify-center">
+              <span class="material-icons-outlined text-2xl">map</span>
+            </div>
+            <span class="font-mono text-[8px] uppercase">Map</span>
+          </div>
+          <div
+            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
           >
-            <div class="relative">
-              <span
-                class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
+            <div
+              class="w-12 h-9 rounded-full flex items-center justify-center relative"
+            >
+              <span class="material-icons-outlined text-2xl"
                 >chat_bubble_outline</span
               >
               <div
-                class="absolute -top-1 -right-1 w-3 h-3 bg-secondary border border-black rounded-full"
+                class="absolute -top-0.5 right-2 w-3 h-3 bg-secondary border border-black rounded-full"
               ></div>
             </div>
-            <span class="font-mono text-[8px] uppercase text-gray-400"
-              >Chat</span
-            >
-          </button>
-          <button
-            class="flex flex-col items-center gap-1 text-gray-400 group"
-            style="--stagger: 3"
+            <span class="font-mono text-[8px] uppercase">Chat</span>
+          </div>
+          <div
+            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
           >
-            <span
-              class="material-icons-outlined text-2xl group-hover:text-black dark:group-hover:text-white transition-colors"
-              >person_outline</span
-            >
-            <span class="font-mono text-[8px] uppercase text-gray-400"
-              >Profile</span
-            >
-          </button>
+            <div class="w-12 h-9 rounded-full flex items-center justify-center">
+              <span class="material-icons-outlined text-2xl"
+                >person_outline</span
+              >
+            </div>
+            <span class="font-mono text-[8px] uppercase">Profile</span>
+          </div>
         </div>
       </nav>
     </div>
+
     <script type="module" src="js/app.js"></script>
     <script>
       (function () {
