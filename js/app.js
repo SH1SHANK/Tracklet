@@ -34,6 +34,16 @@ const fetchWeather = async () => {
   }
 };
 
+// FIX 2: Compute and freeze travel times once per destination
+const computeTimes = (distanceKm) => {
+  return {
+    WALK: Math.ceil((distanceKm / SPEEDS.WALK) * 60),
+    BUS: Math.ceil((distanceKm / SPEEDS.BUS) * 60) + randomInt(2, 8),
+    POOL: Math.ceil((distanceKm / SPEEDS.POOL) * 60),
+    AUTO: Math.ceil((distanceKm / SPEEDS.AUTO) * 60),
+  };
+};
+
 // History management
 const saveHistory = (destination) => {
   let history = JSON.parse(localStorage.getItem("tracklet-history") || "[]");
@@ -188,11 +198,22 @@ const optionsGrid = optionsSection?.querySelector("div.grid") || null;
 const optionCards = optionsGrid ? Array.from(optionsGrid.children) : [];
 const optionMap = optionCards.reduce((acc, card) => {
   const label = card.querySelector("div.font-display");
-  if (label) acc[label.textContent.trim().toUpperCase()] = card;
+  if (label) {
+    const mode = label.textContent.trim().toUpperCase();
+    acc[mode] = card;
+  }
   return acc;
 }, {});
-const recBadge = optionsGrid?.querySelector("div.absolute") || null;
-const recBadgeHome = recBadge?.parentElement || null;
+
+// FIX 4: REC badge map for stable show/hide (not DOM prepend)
+const recBadgeMap = {
+  WALK: document.getElementById("rec-badge-walk"),
+  BUS: document.getElementById("rec-badge-bus"),
+  POOL: document.getElementById("rec-badge-pool"),
+  AUTO: document.getElementById("rec-badge-auto"),
+};
+
+const modeDetailDiv = document.getElementById("mode-detail") || null;
 
 const routeHeading = $$("h2.font-display").find(
   (el) => el.textContent.trim().toLowerCase() === "route",
@@ -203,11 +224,8 @@ const routeText =
 const routeSVG = routeSection?.querySelector("svg") || null;
 const routeProgress = routeSVG?.querySelector("#route-progress") || null;
 
-const autopoolHeading = $$("h2.font-display").find((el) =>
-  el.textContent.toLowerCase().includes("autopool"),
-);
-const autopoolSection =
-  autopoolHeading?.closest("div")?.parentElement?.parentElement || null;
+// FIX 8: Use getElementById for section selectors
+const autopoolSection = document.getElementById("autopool-section") || null;
 const autopoolCard =
   autopoolSection?.querySelector('[class*="min-w-[240px]"]') || null;
 const autopoolName = autopoolCard?.querySelector("p.font-bold") || null;
@@ -217,20 +235,16 @@ const autopoolImpact = autopoolSeatRow?.children?.[1] || null;
 const autopoolRow =
   autopoolSection?.querySelector("div.flex.gap-4.overflow-x-auto") || null;
 
-const gigLabel = $$("span").find(
-  (el) => el.textContent.trim().toLowerCase() === "quick task",
-);
-const gigSection =
-  gigLabel?.closest("div")?.parentElement?.parentElement || null;
+const gigSection = document.getElementById("gig-section") || null;
 const gigRouteLine =
   gigSection?.querySelector("div.font-mono.text-\\[9px\\]") || null;
-const gigTitle = gigSection?.querySelector("h5") || null;
+const gigTitle = gigSection?.querySelector("h3") || null;
 const gigDetail = gigSection?.querySelector("p.font-mono.text-xs") || null;
 const gigImpact =
   gigSection?.querySelector("p.font-mono.text-\\[10px\\]") || null;
 
-const eventCard =
-  $$("div.border-2").find((el) => el.querySelector("h3.font-display")) || null;
+const eventSection = document.getElementById("event-section") || null;
+const eventCard = eventSection || null;
 const eventTitle = eventCard?.querySelector("h3.font-display") || null;
 const eventMeta = eventCard?.querySelector("div.font-mono.text-xs") || null;
 const eventBest = eventCard?.querySelector("div.bg-black") || null;
@@ -358,14 +372,19 @@ const recommend = (distanceKm, hourOfDay) => {
 // State management
 let currentState = null;
 
+// FIX 1 & FIX 2: buildState now sets both recommended and selectedMode,
+// and computes/freezes travel times once per destination.
 const buildState = (destinationInput) => {
   const destination = normalizeDestination(destinationInput);
   const start = randomItem(START_LOCATIONS);
   const distanceKm = distanceKmBetween(start, destination);
   const hourOfDay = new Date().getHours();
 
-  // Use simple distance-based recommendation
+  // Engine's recommendation (immutable after buildState)
   const recommended = recommend(distanceKm, hourOfDay);
+
+  // FIX 2: Compute times once and freeze them in state
+  const times = computeTimes(distanceKm);
 
   // Use weather API data or random fallback
   const weather =
@@ -379,8 +398,9 @@ const buildState = (destinationInput) => {
     destination,
     start,
     distanceKm,
-    recommended,
-    selectedMode: recommended,
+    recommended, // FIX 1: Engine's pick, never changes
+    selectedMode: recommended, // FIX 1: User's current view, starts same as recommended
+    times, // FIX 2: Frozen travel times per destination
     leaveWithin: randomInt(2, 10),
     etaSpread: randomInt(4, 8),
     delay: randomItem(["LOW", "MEDIUM", "HIGH"]),
@@ -406,25 +426,71 @@ const buildState = (destinationInput) => {
   };
 };
 
-const setState = (patch) => {
-  currentState = { ...currentState, ...patch };
-  // For now, re-render everything. Could optimize to only render affected sections.
-  render();
+// FIX 3: PATH A — Full re-render (called by applyState only)
+const renderFull = () => {
+  renderRoute();
+  renderDecision();
+  renderOptions();
+  renderGig();
+  renderEvent();
+
+  hideSkeleton();
+};
+
+// FIX 3: PATH B — Mode selection update (called when user taps an option card)
+const updateModeSelection = (selectedMode) => {
+  currentState.selectedMode = selectedMode;
+  updateOptionsGridVisual();
+  updateModeDetail();
+};
+
+// Update only the visual state of the options grid (PATH B)
+const updateOptionsGridVisual = () => {
+  const selectedMode = currentState.selectedMode;
+  const recommended = currentState.recommended;
+
+  // Update visual highlight (is-selected class)
+  Object.entries(optionMap).forEach(([mode, card]) => {
+    if (mode === selectedMode) {
+      card.classList.add("is-selected");
+    } else {
+      card.classList.remove("is-selected");
+    }
+  });
+
+  pulse(optionsGrid);
+};
+
+// Update the mode-detail strip (FIX 5)
+const updateModeDetail = () => {
+  const selectedMode = currentState.selectedMode;
+  const recommended = currentState.recommended;
+
+  if (!modeDetailDiv) return;
+
+  if (selectedMode === recommended) {
+    // Hide detail strip if user selected the recommended mode
+    modeDetailDiv.classList.add("hidden");
+  } else {
+    // Show detail strip with comparison
+    const selectedTime = currentState.times[selectedMode];
+    const recommendedTime = currentState.times[recommended];
+    modeDetailDiv.textContent = `${selectedMode} takes ${selectedTime} min — engine recommends ${recommended} (${recommendedTime} min, more reliable now)`;
+    modeDetailDiv.classList.remove("hidden");
+  }
 };
 
 // Focused render functions
+
+// FIX 1 & FIX 2: Decision card uses state.recommended (not selectedMode)
+// and state.times (not computed inline)
 const renderDecision = () => {
   const state = currentState;
-  const selectedMode = state.selectedMode;
+  const recommended = state.recommended; // FIX 1: Always use engine's recommendation
 
   const now = new Date();
-  const travelTimes = {
-    WALK: Math.ceil((state.distanceKm / SPEEDS.WALK) * 60),
-    BUS: Math.ceil((state.distanceKm / SPEEDS.BUS) * 60) + randomInt(2, 8),
-    POOL: Math.ceil((state.distanceKm / SPEEDS.POOL) * 60),
-    AUTO: Math.ceil((state.distanceKm / SPEEDS.AUTO) * 60),
-  };
-  const travelTime = travelTimes[selectedMode] || 15;
+  const travelTimes = state.times; // FIX 2: Use frozen times
+  const travelTime = travelTimes[recommended] || 15;
 
   const etaStart = new Date(
     now.getTime() + (state.leaveWithin + travelTime) * 60000,
@@ -433,12 +499,12 @@ const renderDecision = () => {
   const distanceText = `${state.distanceKm.toFixed(1)} km`;
 
   if (decisionMode) {
-    decisionMode.textContent = selectedMode;
+    decisionMode.textContent = recommended;
   }
 
   // Update risk rationale from RATIONALES
   if (riskRationale) {
-    const rationale = randomItem(RATIONALES[selectedMode] || []);
+    const rationale = randomItem(RATIONALES[recommended] || []);
     riskRationale.textContent = rationale;
   }
 
@@ -460,32 +526,38 @@ const renderDecision = () => {
   pulse(decisionCard);
 };
 
+// FIX 2, FIX 3, FIX 4: Options grid and REC badge handling
 const renderOptions = () => {
   const state = currentState;
+  const recommended = state.recommended;
   const selectedMode = state.selectedMode;
+  const travelTimes = state.times; // FIX 2: Use frozen times
 
-  // Calculate travel times for each mode
-  const travelTimes = {
-    WALK: Math.ceil((state.distanceKm / SPEEDS.WALK) * 60),
-    BUS: Math.ceil((state.distanceKm / SPEEDS.BUS) * 60) + randomInt(2, 8),
-    POOL: Math.ceil((state.distanceKm / SPEEDS.POOL) * 60),
-    AUTO: Math.ceil((state.distanceKm / SPEEDS.AUTO) * 60),
-  };
-
+  // Update card visuals (time and styling)
   Object.entries(optionMap).forEach(([mode, card]) => {
     const minutes = travelTimes[mode] || 15;
     updateOptionCard(card, minutes, mode === selectedMode);
   });
 
-  if (recBadge && optionMap[selectedMode]) {
-    optionMap[selectedMode].prepend(recBadge);
-  } else if (recBadge && recBadgeHome) {
-    recBadgeHome.appendChild(recBadge);
-  }
-  if (optionMap[selectedMode]) {
-    Object.values(optionMap).forEach((c) => c.classList.remove("is-selected"));
-    optionMap[selectedMode].classList.add("is-selected");
-  }
+  // FIX 4: REC badge uses show/hide for stability (not DOM prepend)
+  Object.entries(recBadgeMap).forEach(([mode, badge]) => {
+    if (badge) {
+      if (mode === recommended) {
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+  });
+
+  // FIX 3: Set is-selected highlight on selectedMode card
+  Object.entries(optionMap).forEach(([mode, card]) => {
+    if (mode === selectedMode) {
+      card.classList.add("is-selected");
+    } else {
+      card.classList.remove("is-selected");
+    }
+  });
 
   pulse(optionsGrid);
 };
@@ -546,13 +618,17 @@ const renderEvent = () => {
     state.event.location,
   );
 
-  // Default best mode (simplified)
+  // Default best mode (use recommended)
   const bestMode = state.recommended;
   const eventBestTime = Math.ceil((eventDistance / SPEEDS[bestMode]) * 60);
 
-  if (autopoolHeading) {
-    autopoolHeading.textContent = `Autopool to ${state.destination}`;
+  if (autopoolSection) {
+    const autopoolHeading = autopoolSection.querySelector("h2.font-display");
+    if (autopoolHeading) {
+      autopoolHeading.textContent = `Autopool to ${state.destination}`;
+    }
   }
+
   if (state.showAutopool && autopoolCard) {
     if (autopoolName) autopoolName.textContent = state.autopool.name;
     if (autopoolSeats)
@@ -578,31 +654,26 @@ const renderEvent = () => {
   pulse(eventCard);
 };
 
-const render = () => {
-  renderRoute();
-  renderDecision();
-  renderOptions();
-  renderGig();
-  renderEvent();
-
-  hideSkeleton();
-};
-
+// FIX 7: applyState always resets selectedMode to recommended
 const applyState = () => {
   showSkeleton();
   currentState = buildState(searchInput.value);
+  // FIX 7: Reset selectedMode to match recommended for new destination
+  currentState.selectedMode = currentState.recommended;
   saveHistory(currentState.destination);
-  render();
+  renderFull();
 };
 
 const setupSelection = () => {
+  // FIX 3: MODE SELECTION calls PATH B (updateModeSelection), not full render
   makeSelectableGroup(optionsGrid, (card) => {
     const label = card
       .querySelector("div.font-display")
       ?.textContent.trim()
       .toUpperCase();
     if (!label) return;
-    setState({ selectedMode: label });
+    // FIX 3: Call PATH B only, not full render
+    updateModeSelection(label);
   });
   makeSelectableGroup(autopoolRow);
   if (routeSection) {
@@ -614,12 +685,16 @@ const setupSelection = () => {
       );
       const newRecommended = recommend(newDistanceKm, currentState.hourOfDay);
 
-      setState({
+      // Full re-render for route change
+      currentState = {
+        ...currentState,
         start: newStart,
         distanceKm: newDistanceKm,
         recommended: newRecommended,
         selectedMode: newRecommended,
-      });
+        times: computeTimes(newDistanceKm),
+      };
+      renderFull();
     });
   }
 
@@ -633,12 +708,12 @@ const setupSelection = () => {
         event.preventDefault();
         let currentIndex = modes.indexOf(currentState.selectedMode);
         currentIndex = (currentIndex - 1 + modes.length) % modes.length;
-        setState({ selectedMode: modes[currentIndex] });
+        updateModeSelection(modes[currentIndex]);
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
         let currentIndex = modes.indexOf(currentState.selectedMode);
         currentIndex = (currentIndex + 1) % modes.length;
-        setState({ selectedMode: modes[currentIndex] });
+        updateModeSelection(modes[currentIndex]);
       } else if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         const card = optionMap[currentState.selectedMode];
@@ -657,7 +732,9 @@ initAutocomplete();
 // Initialize weather data and load state
 fetchWeather().then(() => {
   currentState = buildState(searchInput.value);
-  render();
+  // FIX 1: Ensure selectedMode starts as recommended
+  currentState.selectedMode = currentState.recommended;
+  renderFull();
 });
 
 goButton?.addEventListener("click", applyState);

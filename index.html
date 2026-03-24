@@ -254,11 +254,10 @@
                 placeholder="Where are you going?"
                 value="Central Library"
               />
-              <ul id="autocomplete-list"
-                  class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-neo-card-dark
-                         border-2 border-black dark:border-white shadow-neo mt-1 hidden max-h-48
-                         overflow-y-auto">
-              </ul>
+              <ul
+                id="autocomplete-list"
+                class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white shadow-neo mt-1 hidden max-h-48 overflow-y-auto"
+              ></ul>
             </div>
             <button
               class="bg-black text-white dark:bg-white dark:text-black border-2 border-black px-3 py-2 font-mono text-[10px] uppercase shadow-neo-sm"
@@ -383,7 +382,8 @@
               data-mode="WALK"
             >
               <div
-                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10"
+                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+                id="rec-badge-walk"
               >
                 REC
               </div>
@@ -400,9 +400,15 @@
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer"
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="BUS"
             >
+              <div
+                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+                id="rec-badge-bus"
+              >
+                REC
+              </div>
               <span class="material-icons-outlined text-2xl mb-1"
                 >directions_bus</span
               >
@@ -420,9 +426,15 @@
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer"
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="POOL"
             >
+              <div
+                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+                id="rec-badge-pool"
+              >
+                REC
+              </div>
               <span class="material-icons-outlined text-2xl mb-1"
                 >directions_car</span
               >
@@ -445,9 +457,15 @@
               </div>
             </div>
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer"
+              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-lg py-2 px-1 shadow-neo-sm flex flex-col items-center justify-center text-black dark:text-white opacity-80 hover:opacity-100 cursor-pointer relative"
               data-mode="AUTO"
             >
+              <div
+                class="absolute -top-2.5 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+                id="rec-badge-auto"
+              >
+                REC
+              </div>
               <span class="material-icons-outlined text-2xl mb-1"
                 >directions_car</span
               >
@@ -470,6 +488,10 @@
               </div>
             </div>
           </div>
+          <div
+            id="mode-detail"
+            class="hidden mt-3 border-2 border-black dark:border-white bg-white dark:bg-neo-card-dark px-3 py-2 font-mono text-[10px] uppercase text-black dark:text-white shadow-neo-sm"
+          ></div>
         </div>
         <div
           class="border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo skeleton"
@@ -571,7 +593,7 @@
             </text>
           </svg>
         </div>
-        <div>
+        <div id="autopool-section">
           <div class="flex justify-between items-center mb-3">
             <div>
               <h2 class="font-display text-xl uppercase">
@@ -638,6 +660,7 @@
           </div>
         </div>
         <div
+          id="gig-section"
           class="bg-[#ffb6c1] dark:bg-[#7e3a44] border-3 border-black dark:border-white rounded-xl p-4 shadow-neo overflow-hidden"
         >
           <div class="flex items-start justify-between mb-3">
@@ -673,6 +696,7 @@
           </div>
         </div>
         <div
+          id="event-section"
           class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white p-4 shadow-neo relative mt-8 mb-4"
         >
           <h2
