@@ -69,6 +69,39 @@ export const SPEEDS = {
   AUTO: 14,
 };
 
+export const RELIABILITY_PEAK_HOURS = [8, 9, 17, 18];
+
+export const MODE_COSTS = {
+  WALK: 0,
+  BUS: 1,
+  POOL: 2,
+  AUTO: 3,
+};
+
+export const RATIONALES = {
+  WALK: [
+    "Walking time is predictable — no waiting, no delays.",
+    "Distance is short enough that walking is the fastest option.",
+    "Weather is clear. Walking is the safest bet right now.",
+    "Peak hours make bus unreliable. Walking guarantees arrival.",
+  ],
+  BUS: [
+    "Bus frequency is good right now. Low chance of a long wait.",
+    "Fastest covered option for this distance off-peak.",
+    "Bus stop is close. Combined wait and ride beats walking.",
+  ],
+  POOL: [
+    "Bus is frequently delayed at this hour. Pool is more reliable.",
+    "Distance is too far to walk comfortably. Pool is efficient.",
+    "Riders are moving along your route in the next few minutes.",
+  ],
+  AUTO: [
+    "It's late and other options are limited. Auto is the safest.",
+    "Distance and time of day make auto the most reliable choice.",
+    "Walking at this hour and distance carries high arrival risk.",
+  ],
+};
+
 export const COORDS = {
   "Central Library": { lat: 11.3218, lon: 75.9349 },
   "Main Building": { lat: 11.321, lon: 75.934 },
