@@ -82,7 +82,8 @@
           box-shadow 160ms ease,
           background-color 160ms ease,
           color 160ms ease,
-          opacity 160ms ease;
+          opacity 160ms ease,
+          border-color 160ms ease;
       }
       .interactive-card:hover,
       .pressable:hover {
@@ -123,6 +124,36 @@
       .pulse-update {
         animation: pulse-flash 240ms ease;
       }
+      .skeleton {
+        position: relative;
+        overflow: hidden;
+      }
+      .skeleton::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          105deg,
+          transparent 25%,
+          rgba(255, 255, 255, 0.55) 45%,
+          transparent 65%
+        );
+        transform: translateX(-120%);
+        animation: skeleton-shimmer 1.15s linear infinite;
+      }
+      .dark .skeleton::after {
+        background: linear-gradient(
+          105deg,
+          transparent 25%,
+          rgba(255, 255, 255, 0.2) 45%,
+          transparent 65%
+        );
+      }
+      @keyframes skeleton-shimmer {
+        to {
+          transform: translateX(120%);
+        }
+      }
       @keyframes pulse-flash {
         0% {
           transform: translateY(0);
@@ -134,40 +165,53 @@
           transform: translateY(0);
         }
       }
-      .reliability-bar {
-        height: 4px;
-        background-color: #e5e7eb;
-        border-radius: 2px;
+      .reliability-track {
+        width: 2.5rem;
+        height: 0.25rem;
+        border-radius: 9999px;
         overflow: hidden;
+        background-color: #e5e7eb;
       }
-      .dark .reliability-bar {
+      .dark .reliability-track {
         background-color: #4b5563;
       }
-      .option-card-selected {
-        background-color: #000000;
-        color: #ffffff;
+      .reliability-fill {
+        height: 100%;
+        border-radius: 9999px;
       }
-      .dark .option-card-selected {
-        background-color: #ffffff;
-        color: #000000;
+      .reliability-width-1 {
+        width: 20%;
+      }
+      .reliability-width-2 {
+        width: 40%;
+      }
+      .reliability-width-3 {
+        width: 60%;
+      }
+      .reliability-width-4 {
+        width: 80%;
+      }
+      .reliability-width-5 {
+        width: 100%;
       }
       body {
         min-height: 100dvh;
       }
       button:focus-visible,
       input:focus-visible,
-      select:focus-visible,
       [role="radio"]:focus-visible,
       [role="radiogroup"]:focus-visible {
         outline: 3px solid #51e5ff;
         outline-offset: 2px;
       }
-      @media (max-width: 380px) {
+      @media (max-width: 390px) {
         #decision-mode {
-          font-size: 2.45rem;
+          font-size: 4rem;
         }
-        #event-title {
-          font-size: 1.85rem;
+      }
+      @media (max-width: 360px) {
+        #decision-mode {
+          font-size: 3.5rem;
         }
         #options-grid {
           gap: 0.625rem;
@@ -176,633 +220,684 @@
     </style>
   </head>
   <body
-    class="bg-neo-bg dark:bg-neo-dark neo-pattern font-body text-black dark:text-white transition-colors duration-200 antialiased overflow-x-hidden"
+    class="neo-pattern overflow-x-hidden bg-neo-bg font-body text-black antialiased transition-colors duration-200 dark:bg-neo-dark dark:text-white"
   >
     <div
-      class="max-w-md mx-auto min-h-screen relative pb-32 border-x-3 border-neo-border dark:border-neo-border-dark bg-neo-bg dark:bg-neo-dark"
+      class="relative mx-auto min-h-screen max-w-md border-x-3 border-neo-border bg-neo-bg pb-32 dark:border-neo-border-dark dark:bg-neo-dark"
     >
       <header
-        class="flex items-center justify-between px-4 py-3 border-b-3 border-neo-border dark:border-neo-border-dark bg-white dark:bg-neo-card-dark sticky top-0 z-40"
+        class="sticky top-0 z-40 flex items-center justify-between border-b-3 border-neo-border bg-white px-4 py-3 dark:border-neo-border-dark dark:bg-neo-card-dark"
       >
         <div class="flex items-center gap-3">
           <div
-            class="w-8 h-8 bg-primary border-3 border-black flex items-center justify-center rounded-sm shadow-neo-sm"
+            class="flex h-8 w-8 items-center justify-center rounded-sm border-3 border-black bg-primary shadow-neo-sm"
           >
-            <span class="material-icons-outlined text-black text-lg"
+            <span class="material-icons-outlined text-lg text-black"
               >directions_run</span
             >
           </div>
           <div>
             <h1
-              class="font-display text-xl tracking-tighter uppercase leading-none dark:text-white"
+              class="font-display text-xl uppercase leading-none tracking-tighter dark:text-white"
             >
               Tracklet
             </h1>
             <p
-              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
+              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-400"
             >
               Campus commute
             </p>
           </div>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex items-center gap-2">
           <button
             id="theme-toggle"
             type="button"
-            class="pressable w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center bg-white dark:bg-neo-card-dark shadow-neo-sm"
+            class="pressable flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-white shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
             aria-label="Toggle theme"
           >
             <span
               id="theme-icon"
-              class="material-icons-outlined text-black dark:text-white text-lg"
+              class="material-icons-outlined text-lg text-black dark:text-white"
               >dark_mode</span
             >
           </button>
           <div
-            class="w-9 h-9 border-2 border-black dark:border-white rounded-full flex items-center justify-center bg-white/70 dark:bg-neo-card-dark/70 opacity-80"
+            class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-white/70 opacity-80 dark:border-white dark:bg-neo-card-dark/70"
             aria-hidden="true"
           >
             <span
-              class="material-icons-outlined text-black dark:text-white text-lg"
+              class="material-icons-outlined text-lg text-black dark:text-white"
               >notifications</span
             >
           </div>
         </div>
       </header>
 
-      <main class="p-4 space-y-4">
+      <main class="space-y-4 px-4 pt-4">
         <section
-          class="animate-in border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
+          id="planner-card"
+          class="animate-in rounded-[1.6rem] border-3 border-black bg-white p-4 shadow-neo dark:border-white dark:bg-neo-card-dark"
           style="--stagger: 0"
           aria-label="Route controls"
         >
-          <div class="flex items-start justify-between mb-4 gap-3">
+          <div class="mb-3 flex items-start justify-between gap-3">
             <div>
               <p
-                class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300"
+                class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
               >
                 Trip planner
               </p>
-              <h2 class="font-display text-2xl uppercase leading-none">
+              <h2 class="font-display text-[1.95rem] uppercase leading-none">
                 Set your route
               </h2>
             </div>
             <span
-              class="bg-primary border-2 border-black px-2 py-1 text-[9px] font-mono font-bold uppercase text-black shadow-neo-sm"
+              class="border-2 border-black bg-primary px-3 py-2 font-mono text-[12px] font-bold uppercase text-black shadow-neo-sm"
               >Live</span
             >
           </div>
-          <div
-            class="grid grid-cols-[1fr_1.2fr_auto] gap-2 items-end max-[430px]:grid-cols-1"
-          >
-            <div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="relative min-w-0">
               <label
                 for="origin-select"
-                class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
+                class="mb-1 block font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
                 >Origin</label
               >
-              <select
+              <button
                 id="origin-select"
-                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white px-2 py-2 font-mono text-[11px] uppercase"
+                type="button"
+                class="pressable flex min-h-[46px] w-full items-center gap-2 border-b-3 border-black bg-transparent px-0 py-2 text-left font-mono text-[10px] uppercase text-black dark:border-white dark:text-white"
+                aria-haspopup="listbox"
+                aria-expanded="false"
               >
-                <option>MBH I</option>
-                <option selected>MBH II</option>
-                <option>LH</option>
-                <option>GH</option>
-                <option>Main Building</option>
-                <option>SAC</option>
-                <option>Central Plaza</option>
-              </select>
+                <span
+                  id="origin-select-text"
+                  class="min-w-0 flex-1 whitespace-normal break-words leading-tight"
+                ></span>
+                <span
+                  class="material-icons-outlined shrink-0 text-base text-black dark:text-white"
+                  >expand_more</span
+                >
+              </button>
+              <div
+                id="origin-menu"
+                class="absolute left-0 right-0 top-full z-30 mt-2 hidden border-2 border-black bg-white shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
+              >
+                <div
+                  id="origin-options"
+                  class="flex max-h-56 flex-col overflow-y-auto hide-scroll"
+                  role="listbox"
+                  aria-label="Origin locations"
+                ></div>
+              </div>
             </div>
-            <div class="relative">
+
+            <div class="relative min-w-0">
               <label
-                for="destination-search"
-                class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
+                for="destination-select"
+                class="mb-1 block font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
                 >Destination</label
               >
-              <input
-                id="destination-search"
-                class="w-full bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white px-3 py-2 font-mono text-[11px] uppercase placeholder:text-gray-400"
-                placeholder="Where are you going?"
-                value="Central Library"
-                maxlength="34"
-              />
-              <ul
-                id="autocomplete-list"
-                class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-neo-card-dark border-2 border-black dark:border-white rounded-md shadow-neo mt-1 hidden max-h-56 overflow-y-auto overflow-x-hidden"
-              ></ul>
+              <button
+                id="destination-select"
+                type="button"
+                class="pressable flex min-h-[46px] w-full items-center gap-2 border-b-3 border-black bg-transparent px-0 py-2 text-left font-mono text-[10px] uppercase text-black dark:border-white dark:text-white"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                <span
+                  id="destination-select-text"
+                  class="min-w-0 flex-1 whitespace-normal break-words leading-tight"
+                ></span>
+                <span
+                  class="material-icons-outlined shrink-0 text-base text-black dark:text-white"
+                  >expand_more</span
+                >
+              </button>
+              <div
+                id="destination-menu"
+                class="absolute left-0 right-0 top-full z-30 mt-2 hidden border-2 border-black bg-white shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
+              >
+                <div
+                  id="destination-options"
+                  class="flex max-h-56 flex-col overflow-y-auto hide-scroll"
+                  role="listbox"
+                  aria-label="Destination locations"
+                ></div>
+              </div>
             </div>
+          </div>
+
+          <div class="mt-2">
             <button
               id="go-button"
               type="button"
-              class="pressable bg-black text-white dark:bg-white dark:text-black border-2 border-black dark:border-white px-3 py-2 font-mono text-[10px] uppercase shadow-neo-sm max-[430px]:w-full"
+              class="pressable flex min-h-[46px] w-full items-center justify-center border-2 border-black bg-black px-4 py-2 font-mono text-[10px] uppercase text-white shadow-neo-sm dark:border-white dark:bg-white dark:text-black"
             >
-              Refresh
+              Refresh route
             </button>
           </div>
-          <div class="grid grid-cols-2 gap-2 mt-3 max-[430px]:grid-cols-1">
+
+          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div
-              class="border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-2 py-1.5"
+              class="min-h-[66px] border-2 border-black bg-[#FFF9EF] px-3 py-2 dark:border-white dark:bg-[#2a2a2a]"
             >
               <p
                 class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
               >
                 Current time
               </p>
-              <span
+              <p
                 id="live-clock"
-                class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300"
-              ></span>
+                class="mt-2 font-mono text-[11px] uppercase text-gray-700 dark:text-gray-400"
+              ></p>
             </div>
             <div
-              class="border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-2 py-1.5"
+              class="min-h-[66px] border-2 border-black bg-[#FFF9EF] px-3 py-2 dark:border-white dark:bg-[#2a2a2a]"
             >
               <p
                 class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
               >
                 Active route
               </p>
-              <span
+              <p
                 id="dest-label"
-                class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 truncate block"
-              >
-                MBH II to Central Library
-              </span>
+                class="mt-2 whitespace-normal break-words font-mono text-[11px] uppercase leading-snug text-gray-700 dark:text-gray-400"
+              ></p>
             </div>
           </div>
-          <div id="history-strip" class="hidden mt-3">
+
+          <div id="history-strip" class="mt-3 hidden">
             <p
-              class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400 mb-2"
+              class="mb-1.5 font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
             >
               Recent picks
             </p>
-            <div id="history-chips" class="flex flex-wrap gap-2"></div>
+            <div
+              id="history-chips"
+              class="flex flex-wrap gap-2 overflow-x-auto hide-scroll"
+            ></div>
           </div>
         </section>
 
         <section
           id="decision-card"
-          class="animate-in bg-primary border-3 border-black dark:border-white rounded-xl p-5 shadow-neo"
+          class="animate-in rounded-[1.8rem] border-3 border-black bg-primary p-5 shadow-neo"
           style="--stagger: 1"
           aria-live="polite"
         >
-          <div class="mb-2">
+          <div class="flex items-start justify-between gap-3">
             <span
-              class="bg-white border-2 border-black px-2 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm inline-block"
+              class="border-2 border-black bg-white px-2 py-1 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm"
               >Recommended</span
             >
+            <span
+              class="border-2 border-black bg-black px-2 py-1 font-mono text-[10px] font-bold uppercase text-primary shadow-neo-sm"
+              >Live</span
+            >
           </div>
+
           <h2
             id="decision-mode"
-            class="font-display text-5xl uppercase leading-none mb-3 text-black tracking-tighter"
+            class="mt-5 font-display text-[4.5rem] uppercase leading-[0.9] text-black"
           >
             WALK
           </h2>
-          <div class="h-5 mb-3 flex gap-2">
+
+          <div class="mb-4 mt-5 flex gap-1.5">
             <div
-              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
+              class="confidence-segment h-4 w-8 border-2 border-black bg-black"
             ></div>
             <div
-              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
+              class="confidence-segment h-4 w-8 border-2 border-black bg-black"
             ></div>
             <div
-              class="confidence-segment w-5 h-5 bg-black border-2 border-black"
+              class="confidence-segment h-4 w-8 border-2 border-black bg-black"
             ></div>
             <div
-              class="confidence-segment w-5 h-5 bg-gray-200 border-2 border-black"
+              class="confidence-segment h-4 w-8 border-2 border-black bg-primary/40"
             ></div>
             <div
-              class="confidence-segment w-5 h-5 bg-gray-200 border-2 border-black"
+              class="confidence-segment h-4 w-8 border-2 border-black bg-primary/40"
             ></div>
           </div>
-          <div class="flex items-center gap-2 flex-wrap mb-3">
+
+          <div class="mb-3">
             <div
               id="arrival-summary"
-              class="bg-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase text-black shadow-neo-sm flex-1"
-            ></div>
-            <div
-              id="spare-time-badge"
-              class="bg-green-400 border-2 border-black px-2 py-2 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm whitespace-nowrap"
+              class="border-2 border-black bg-white px-3 py-2 font-mono text-[10px] uppercase text-black shadow-neo-sm"
             ></div>
           </div>
+
           <p
             id="risk-rationale"
-            class="font-mono text-[10px] uppercase text-black mb-3"
+            class="mb-3 truncate font-mono text-[11px] font-bold uppercase text-black"
           ></p>
+
           <div class="flex flex-wrap gap-2">
             <div
-              class="bg-secondary border-2 border-black px-3 py-1.5 font-bold text-xs uppercase flex items-center gap-1 text-black shadow-neo-sm"
+              class="flex items-center gap-1 border-2 border-black bg-secondary px-2 py-1 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm"
             >
               <span class="material-icons-outlined text-sm">warning</span>
-              <span id="delay-chip-text">Delay risk: medium</span>
+              <span id="delay-chip-text"></span>
             </div>
             <div
-              class="bg-white border-2 border-black px-3 py-1.5 font-bold text-xs uppercase text-black shadow-neo-sm flex items-center gap-1"
+              class="flex items-center gap-1 border-2 border-black bg-white px-2 py-1 font-mono text-[10px] font-bold uppercase text-black shadow-neo-sm"
             >
               <span class="material-icons-outlined text-sm">water_drop</span>
-              <span id="weather-chip-text">Weather: clear</span>
+              <span id="weather-chip-text"></span>
             </div>
           </div>
         </section>
 
         <section class="animate-in" style="--stagger: 2">
-          <h2
+          <p
             id="options-heading"
-            class="font-mono text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2"
+            class="mb-2 mt-1 font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
           >
             Options to Central Library
-          </h2>
-          <div id="options-grid" class="grid grid-cols-2 gap-3">
-            <div
+          </p>
+          <div
+            id="options-grid"
+            class="grid grid-cols-2 gap-3"
+            role="group"
+            aria-label="Transport options"
+          >
+            <button
+              type="button"
               data-mode="WALK"
-              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
+              class="interactive-card relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-3 border-black bg-white p-3 text-black opacity-75 shadow-neo-sm dark:border-white dark:bg-neo-card-dark dark:text-white"
             >
-              <div
-                data-role="rec-badge"
-                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+              <span
+                id="rec-badge-walk"
+                class="absolute -top-3 left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-black bg-primary px-3 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
+                >REC</span
               >
-                REC
-              </div>
               <span class="material-icons-outlined text-2xl"
                 >directions_walk</span
               >
-              <div class="font-display text-lg leading-none">WALK</div>
-              <div data-role="time" class="font-mono text-[11px] mt-1">
-                10 MIN
-              </div>
-              <div class="reliability-bar w-12 mt-1">
+              <span class="font-display text-xl uppercase leading-none"
+                >Walk</span
+              >
+              <span
+                id="time-walk"
+                class="font-mono text-[11px] text-gray-600 dark:text-gray-400"
+                >4 min</span
+              >
+              <div class="reliability-track mt-1">
                 <div
-                  data-role="reliability-fill"
-                  class="h-full bg-black dark:bg-white"
-                  style="width: 95%"
+                  id="reliability-walk"
+                  class="reliability-fill reliability-width-5 bg-green-500"
                 ></div>
               </div>
-            </div>
-            <div
+            </button>
+
+            <button
+              type="button"
               data-mode="BUS"
-              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
+              class="interactive-card relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-3 border-black bg-white p-3 text-black opacity-75 shadow-neo-sm dark:border-white dark:bg-neo-card-dark dark:text-white"
             >
-              <div
-                data-role="rec-badge"
-                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+              <span
+                id="rec-badge-bus"
+                class="absolute -top-3 left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-black bg-primary px-3 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
+                >REC</span
               >
-                REC
-              </div>
               <span class="material-icons-outlined text-2xl"
                 >directions_bus</span
               >
-              <div class="font-display text-lg leading-none">BUS</div>
-              <div data-role="time" class="font-mono text-[11px] mt-1">
-                15 MIN
-              </div>
-              <div class="reliability-bar w-12 mt-1">
+              <span class="font-display text-xl uppercase leading-none"
+                >Bus</span
+              >
+              <span
+                id="time-bus"
+                class="font-mono text-[11px] text-gray-600 dark:text-gray-400"
+                >9 min</span
+              >
+              <div class="reliability-track mt-1">
                 <div
-                  data-role="reliability-fill"
-                  class="h-full bg-black dark:bg-white"
-                  style="width: 82%"
+                  id="reliability-bus"
+                  class="reliability-fill reliability-width-3 bg-yellow-400"
                 ></div>
               </div>
-            </div>
-            <div
+            </button>
+
+            <button
+              type="button"
               data-mode="POOL"
-              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
+              class="interactive-card relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-3 border-black bg-white p-3 text-black opacity-75 shadow-neo-sm dark:border-white dark:bg-neo-card-dark dark:text-white"
             >
-              <div
-                data-role="rec-badge"
-                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+              <span
+                id="rec-badge-pool"
+                class="absolute -top-3 left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-black bg-primary px-3 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
+                >REC</span
               >
-                REC
-              </div>
-              <span class="material-icons-outlined text-2xl">diversity_3</span>
-              <div class="font-display text-lg leading-none">POOL</div>
-              <div data-role="time" class="font-mono text-[11px] mt-1">
-                12 MIN
-              </div>
-              <div class="reliability-bar w-12 mt-1">
+              <span class="material-icons-outlined text-2xl"
+                >directions_car</span
+              >
+              <span class="font-display text-xl uppercase leading-none"
+                >Pool</span
+              >
+              <span
+                id="time-pool"
+                class="font-mono text-[11px] text-gray-600 dark:text-gray-400"
+                >8 min</span
+              >
+              <div class="reliability-track mt-1">
                 <div
-                  data-role="reliability-fill"
-                  class="h-full bg-black dark:bg-white"
-                  style="width: 78%"
+                  id="reliability-pool"
+                  class="reliability-fill reliability-width-4 bg-green-500"
                 ></div>
               </div>
-            </div>
-            <div
+            </button>
+
+            <button
+              type="button"
               data-mode="AUTO"
-              class="interactive-card border-3 border-black dark:border-white rounded-lg min-h-[102px] p-3 relative shadow-neo-sm flex flex-col items-center justify-center gap-1 cursor-pointer bg-white dark:bg-neo-card-dark text-black dark:text-white opacity-70 dark:opacity-60"
+              class="interactive-card relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-3 border-black bg-white p-3 text-black opacity-75 shadow-neo-sm dark:border-white dark:bg-neo-card-dark dark:text-white"
             >
-              <div
-                data-role="rec-badge"
-                class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-black text-[10px] font-bold px-2 border-2 border-black rounded-full shadow-sm z-10 hidden"
+              <span
+                id="rec-badge-auto"
+                class="absolute -top-3 left-1/2 hidden -translate-x-1/2 rounded-full border-2 border-black bg-primary px-3 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
+                >REC</span
               >
-                REC
-              </div>
-              <span class="material-icons-outlined text-2xl">local_taxi</span>
-              <div class="font-display text-lg leading-none">AUTO</div>
-              <div data-role="time" class="font-mono text-[11px] mt-1">
-                14 MIN
-              </div>
-              <div class="reliability-bar w-12 mt-1">
+              <span class="material-icons-outlined text-2xl"
+                >electric_rickshaw</span
+              >
+              <span class="font-display text-xl uppercase leading-none"
+                >Auto</span
+              >
+              <span
+                id="time-auto"
+                class="font-mono text-[11px] text-gray-600 dark:text-gray-400"
+                >7 min</span
+              >
+              <div class="reliability-track mt-1">
                 <div
-                  data-role="reliability-fill"
-                  class="h-full bg-black dark:bg-white"
-                  style="width: 74%"
+                  id="reliability-auto"
+                  class="reliability-fill reliability-width-4 bg-yellow-400"
                 ></div>
               </div>
-            </div>
+            </button>
           </div>
           <div
             id="mode-detail"
-            class="hidden mt-3 border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-neo-card-dark px-3 py-3 text-black dark:text-white shadow-neo-sm"
-          >
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <h3
-                class="font-display text-base uppercase leading-none tracking-tight"
-              >
-                Alternative mode insights
-              </h3>
-              <span
-                class="border-2 border-black dark:border-white px-2 py-0.5 font-mono text-[8px] uppercase"
-                >comparison</span
-              >
-            </div>
-            <p
-              id="mode-detail-summary"
-              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
-            ></p>
-            <div class="grid grid-cols-2 gap-2 mt-2 max-[430px]:grid-cols-1">
-              <div
-                class="border-2 border-black dark:border-white bg-white dark:bg-[#1f1f1f] px-2 py-2"
-              >
-                <p
-                  class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
-                >
-                  Selected
-                </p>
-                <p
-                  id="mode-detail-selected"
-                  class="font-mono text-[10px] uppercase font-bold"
-                ></p>
-              </div>
-              <div
-                class="border-2 border-black dark:border-white bg-primary text-black px-2 py-2"
-              >
-                <p class="font-mono text-[8px] uppercase opacity-70">
-                  Recommended
-                </p>
-                <p
-                  id="mode-detail-recommended"
-                  class="font-mono text-[10px] uppercase font-bold"
-                ></p>
-              </div>
-            </div>
-            <p
-              id="mode-detail-tip"
-              class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-2"
-            ></p>
-          </div>
+            class="mt-2 hidden border-2 border-black bg-white px-3 py-2 font-mono text-[10px] uppercase text-black dark:border-white dark:bg-neo-card-dark dark:text-white"
+          ></div>
         </section>
 
         <div
-          class="animate-in flex items-center gap-3 my-1"
-          style="--stagger: 4"
+          id="secondary-divider"
+          class="animate-in my-4 flex items-center gap-3"
+          style="--stagger: 3"
         >
-          <div
-            class="flex-1 border-t-2 border-black dark:border-white opacity-20"
-          ></div>
+          <div class="h-px flex-1 bg-black opacity-20 dark:bg-white"></div>
           <span
-            class="font-mono text-[9px] uppercase text-gray-700 dark:text-gray-300"
+            class="px-2 font-mono text-[9px] uppercase text-gray-400 dark:text-gray-500"
             >More options</span
           >
-          <div
-            class="flex-1 border-t-2 border-black dark:border-white opacity-20"
-          ></div>
+          <div class="h-px flex-1 bg-black opacity-20 dark:bg-white"></div>
         </div>
 
-        <section id="secondary-options" class="space-y-4">
-          <div
-            class="animate-in border-2 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-lg px-3 py-2"
+        <section id="secondary-zone" class="space-y-4">
+          <section
+            id="bus-section"
+            class="animate-in rounded-2xl border-2 border-black bg-white p-3 shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
+            style="--stagger: 4"
+          >
+            <div class="mb-3">
+              <p
+                class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
+              >
+                Transit
+              </p>
+              <div class="mt-1 flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="font-display text-lg uppercase leading-none">
+                    Nearest Bus
+                  </h3>
+                  <p
+                    id="bus-feed-note"
+                    class="mt-1 font-mono text-[9px] uppercase leading-snug text-gray-600 dark:text-gray-400"
+                  >
+                    Usually on time this hour
+                  </p>
+                </div>
+                <span
+                  id="bus-route-name"
+                  class="shrink-0 border-2 border-black bg-white px-2 py-1 font-mono text-[9px] uppercase text-black shadow-neo-sm dark:border-white dark:bg-[#1f1f1f] dark:text-white"
+                >
+                  Bus 1
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="rounded-xl border-2 border-black bg-[#FFF9EF] p-3 dark:border-white dark:bg-[#1f1f1f]"
+            >
+              <div class="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                <div class="min-w-0">
+                  <p
+                    class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
+                  >
+                    Closest stop
+                  </p>
+                  <p
+                    id="bus-stop-name"
+                    class="mt-1 font-mono text-[11px] uppercase leading-snug text-black dark:text-white"
+                  >
+                    Main Gate Stop
+                  </p>
+                  <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <span
+                      id="bus-status-badge"
+                      class="border-2 border-black bg-primary px-2 py-1 font-mono text-[9px] font-bold uppercase text-black shadow-neo-sm"
+                      >Arriving</span
+                    >
+                    <span
+                      id="bus-last-updated"
+                      class="font-mono text-[8px] uppercase text-gray-500 dark:text-gray-400"
+                    >
+                      Updated just now
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  class="flex w-full flex-col justify-center border-2 border-black bg-black px-3 py-3 text-left dark:border-white dark:bg-white sm:min-w-[132px]"
+                >
+                  <p
+                    class="font-mono text-[8px] uppercase text-white dark:text-black"
+                  >
+                    Arrival by
+                  </p>
+                  <p
+                    id="bus-arrival"
+                    class="mt-1 font-display text-lg uppercase leading-none text-white dark:text-black"
+                  >
+                    7:53-7:55 PM
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <p
+                  id="bus-meta"
+                  class="border-2 border-black bg-white px-3 py-2 font-mono text-[9px] uppercase leading-snug text-gray-700 dark:border-white dark:bg-neo-card-dark dark:text-gray-400"
+                >
+                  Delay chance low
+                </p>
+                <p
+                  id="bus-reliability"
+                  class="border-2 border-black bg-white px-3 py-2 font-mono text-[9px] uppercase leading-snug text-gray-700 dark:border-white dark:bg-neo-card-dark dark:text-gray-400"
+                >
+                  Usually on time
+                </p>
+                <p
+                  id="bus-crowd"
+                  class="border-2 border-black bg-white px-3 py-2 font-mono text-[9px] uppercase leading-snug text-gray-700 dark:border-white dark:bg-neo-card-dark dark:text-gray-400"
+                >
+                  Crowd steady
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="autopool-section"
+            class="animate-in rounded-2xl border-2 border-black bg-white p-3 shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
             style="--stagger: 5"
           >
-            <h2 class="font-display text-lg uppercase leading-none">
-              Route add-ons
-            </h2>
-            <p
-              class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1"
-            >
-              Optional extras you can do while heading to your destination.
-            </p>
-          </div>
-          <div
-            id="autopool-section"
-            class="animate-in border-3 border-black dark:border-white bg-white dark:bg-neo-card-dark rounded-xl p-4 shadow-neo"
-            style="--stagger: 6"
-          >
-            <div class="flex justify-between items-center mb-3 gap-3">
+            <div class="mb-3 flex items-start justify-between gap-3">
               <div>
-                <h2
-                  id="autopool-heading"
-                  class="font-display text-xl uppercase"
-                >
-                  Autopool to Central Library
-                </h2>
                 <p
-                  class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
+                  class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
                 >
-                  Optional shared ride match
+                  Rideshare module
+                </p>
+                <h3
+                  id="autopool-heading"
+                  class="mt-1 font-display text-lg uppercase leading-none"
+                >
+                  Pooling
+                </h3>
+                <p
+                  id="autopool-note"
+                  class="mt-1 font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
+                >
+                  Nearby rides heading your way
                 </p>
               </div>
               <span
                 id="autopool-status-badge"
-                class="bg-primary border-2 border-black text-[10px] font-bold uppercase px-2 py-1 text-black shadow-neo-sm"
+                class="border-2 border-black bg-primary px-2 py-1 font-mono text-[9px] font-bold uppercase text-black shadow-neo-sm"
                 >Available</span
               >
             </div>
+
             <div
-              class="bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white rounded-xl p-4 shadow-neo-sm"
+              class="mb-3 rounded-xl border-2 border-black bg-[#FFF9EF] p-3 dark:border-white dark:bg-[#1f1f1f]"
             >
-              <div class="flex items-start justify-between mb-3 gap-3">
-                <div>
-                  <p id="autopool-name" class="font-bold text-sm leading-none">
-                    Sarah K.
-                  </p>
-                  <p
-                    id="autopool-meta"
-                    class="text-xs text-gray-500 dark:text-gray-300"
-                  >
-                    Biology 26
-                  </p>
-                  <p
-                    id="autopool-pickup"
-                    class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1"
-                  >
-                    Hatchback | pickup in 3 min
-                  </p>
-                </div>
-                <span
-                  class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300"
-                  >Live mock data</span
-                >
-              </div>
-              <div
-                class="bg-black text-white border-2 border-black px-3 py-2 font-display text-lg leading-none flex items-baseline justify-between mb-2"
+              <p
+                id="autopool-summary"
+                class="font-mono text-[10px] uppercase leading-snug text-black dark:text-white"
               >
-                <span id="autopool-seats">2 seats</span>
-                <span id="autopool-impact" class="font-mono text-xs"
-                  >+2 min</span
-                >
-              </div>
-              <div
-                class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-300"
-              >
-                You can also create your own pooling option below.
-              </div>
-              <div class="mt-3 border-t-2 border-black dark:border-white pt-3">
+                Available pools on this route
+              </p>
+            </div>
+
+            <div
+              class="flex gap-2 overflow-x-auto pb-1 hide-scroll snap-x snap-mandatory"
+              id="autopool-offer-list"
+            ></div>
+          </section>
+
+          <section
+            id="gig-section"
+            class="animate-in hidden rounded-2xl border-2 border-black bg-[#FFB6C1] p-3 shadow-neo-sm dark:border-white dark:bg-[#7E3A44]"
+            style="--stagger: 6"
+          >
+            <p
+              class="font-mono text-[9px] uppercase text-gray-800 dark:text-gray-100"
+            >
+              Task module
+            </p>
+            <div class="mt-1 flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-display text-lg uppercase leading-none">
+                  GigWorks
+                </h3>
                 <p
-                  class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-300 mb-2"
+                  id="gig-note"
+                  class="mt-1 font-mono text-[9px] uppercase text-gray-700 dark:text-gray-200"
                 >
-                  More nearby pools
+                  Quick tasks that fit this route
                 </p>
-                <div id="autopool-offer-list" class="space-y-2"></div>
-                <button
-                  id="add-pooling-button"
-                  type="button"
-                  class="pressable mt-3 w-full border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-[#1f1f1f] px-3 py-2 font-mono text-[10px] uppercase font-bold text-black dark:text-white shadow-neo-sm"
-                >
-                  Add your own pooling
-                </button>
               </div>
             </div>
-          </div>
+            <p
+              id="gig-route-line"
+              class="mt-3 font-mono text-[9px] uppercase text-gray-800 dark:text-gray-100"
+            ></p>
+            <div
+              id="gig-carousel"
+              class="mt-3 flex gap-2 overflow-x-auto pb-1 hide-scroll snap-x snap-mandatory"
+            ></div>
+          </section>
 
-          <div
-            id="gig-section"
-            class="animate-in bg-[#FFB6C1] dark:bg-[#7E3A44] border-3 border-black dark:border-white rounded-xl p-4 shadow-neo overflow-hidden"
+          <section
+            id="event-section"
+            class="animate-in rounded-2xl border-2 border-black bg-white p-3 shadow-neo-sm dark:border-white dark:bg-neo-card-dark"
             style="--stagger: 7"
           >
-            <div class="flex items-start justify-between mb-3 gap-3">
+            <p
+              class="font-mono text-[9px] uppercase text-gray-500 dark:text-gray-400"
+            >
+              Events
+            </p>
+            <div class="mt-1 flex items-start justify-between gap-3">
               <div>
-                <span
-                  class="bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-mono text-[9px] font-bold uppercase border-2 border-black dark:border-white"
-                  >Optional micro-gig</span
-                >
-                <div
-                  id="gig-route-line"
-                  class="font-mono text-[9px] uppercase mt-2 text-gray-800 dark:text-gray-100"
-                >
-                  Can be done while going to Central Library
-                </div>
-              </div>
-              <span
-                class="font-mono text-[9px] uppercase text-gray-800 dark:text-gray-100"
-                >Optional</span
-              >
-            </div>
-            <h3 id="gig-title" class="font-display text-xl leading-none mb-1">
-              Deliver coffee
-            </h3>
-            <p
-              id="gig-detail"
-              class="font-mono text-xs mb-1 text-gray-800 dark:text-gray-200"
-            >
-              Central Library | Rs 30
-            </p>
-            <p
-              id="gig-impact"
-              class="font-mono text-[10px] uppercase text-gray-700 dark:text-gray-300"
-            >
-              Optional add-on: about 4 extra min
-            </p>
-          </div>
-
-          <div
-            id="event-section"
-            class="animate-in bg-white dark:bg-neo-card-dark border-3 border-black dark:border-white p-4 shadow-neo"
-            style="--stagger: 8"
-          >
-            <div
-              class="border-2 border-black p-4 bg-[#FFF9EF] dark:bg-neo-card-dark"
-            >
-              <div class="flex items-start justify-between mb-2 gap-2">
-                <h3
-                  id="event-title"
-                  class="font-display text-2xl uppercase leading-none"
-                >
-                  Campus Market
+                <h3 class="font-display text-lg uppercase leading-none">
+                  On The Way
                 </h3>
-                <span
-                  id="event-tag"
-                  class="bg-primary border-2 border-black px-2 py-0.5 font-mono text-[9px] font-bold uppercase text-black"
-                  >Today</span
-                >
-              </div>
-              <div
-                id="event-meta"
-                class="font-mono text-xs font-bold uppercase mb-1"
-              >
-                Central Plaza | 12:00 PM | 0.6 km from Central Library
-              </div>
-              <div
-                id="event-best"
-                class="bg-black text-white border-2 border-black px-3 py-2 font-mono text-[10px] uppercase mb-3"
-              >
-                Best way: WALK | 6 min from Central Library
-              </div>
-              <div
-                class="font-mono text-[10px] uppercase text-gray-600 dark:text-gray-300"
-              >
-                Event route preview is shown here without launching a separate
-                flow.
+                <p
+                  id="event-route-line"
+                  class="mt-1 font-mono text-[9px] uppercase text-gray-600 dark:text-gray-400"
+                ></p>
               </div>
             </div>
-          </div>
+            <div
+              id="event-carousel"
+              class="mt-3 flex gap-2 overflow-x-auto pb-1 hide-scroll snap-x snap-mandatory"
+            ></div>
+          </section>
         </section>
       </main>
 
       <nav
-        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-neo-card-dark border-t-3 border-neo-border dark:border-neo-border-dark pt-4 px-6 z-40"
+        class="fixed bottom-0 left-0 right-0 z-40 mx-auto max-w-md border-t-3 border-neo-border bg-white px-6 pt-4 dark:border-neo-border-dark dark:bg-neo-card-dark"
         style="padding-bottom: calc(1rem + env(safe-area-inset-bottom))"
         aria-label="Primary navigation"
       >
-        <div class="flex justify-between items-center">
-          <div
-            class="flex flex-col items-center gap-1 text-black dark:text-white"
-          >
+        <div class="flex items-center justify-between">
+          <div class="flex flex-col items-center gap-1 text-black dark:text-white">
             <div
-              class="w-12 h-9 bg-primary border-2 border-black dark:border-white rounded-full flex items-center justify-center"
+              class="flex h-9 w-12 items-center justify-center rounded-full border-2 border-black bg-primary dark:border-white"
             >
-              <span class="material-icons-outlined text-black text-lg"
+              <span class="material-icons-outlined text-lg text-black"
                 >home</span
               >
             </div>
             <span class="font-mono text-[8px] uppercase">Home</span>
           </div>
           <div
-            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
+            class="flex flex-col items-center gap-1 text-gray-500 opacity-75 dark:text-gray-400"
           >
-            <div class="w-12 h-9 rounded-full flex items-center justify-center">
+            <div class="flex h-9 w-12 items-center justify-center rounded-full">
               <span class="material-icons-outlined text-2xl">map</span>
             </div>
             <span class="font-mono text-[8px] uppercase">Map</span>
           </div>
           <div
-            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
+            class="flex flex-col items-center gap-1 text-gray-500 opacity-75 dark:text-gray-400"
           >
             <div
-              class="w-12 h-9 rounded-full flex items-center justify-center relative"
+              class="relative flex h-9 w-12 items-center justify-center rounded-full"
             >
               <span class="material-icons-outlined text-2xl"
                 >chat_bubble_outline</span
               >
               <div
-                class="absolute -top-0.5 right-2 w-3 h-3 bg-secondary border border-black rounded-full"
+                class="absolute right-2 top-0 h-3 w-3 rounded-full border border-black bg-secondary"
               ></div>
             </div>
             <span class="font-mono text-[8px] uppercase">Chat</span>
           </div>
           <div
-            class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-300 opacity-75"
+            class="flex flex-col items-center gap-1 text-gray-500 opacity-75 dark:text-gray-400"
           >
-            <div class="w-12 h-9 rounded-full flex items-center justify-center">
+            <div class="flex h-9 w-12 items-center justify-center rounded-full">
               <span class="material-icons-outlined text-2xl"
                 >person_outline</span
               >

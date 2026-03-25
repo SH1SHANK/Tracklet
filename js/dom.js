@@ -23,11 +23,6 @@ export const elements = {
   ),
   optionsHeading: byId("options-heading"),
   optionsGrid: byId("options-grid"),
-  modeDetail: byId("mode-detail"),
-  modeDetailSummary: byId("mode-detail-summary"),
-  modeDetailSelected: byId("mode-detail-selected"),
-  modeDetailRecommended: byId("mode-detail-recommended"),
-  modeDetailTip: byId("mode-detail-tip"),
   optionCards,
   optionMap: optionCards.reduce((map, card) => {
     const mode = card.getAttribute("data-mode");
@@ -43,7 +38,6 @@ export const elements = {
   autopoolSeats: byId("autopool-seats"),
   autopoolImpact: byId("autopool-impact"),
   autopoolOfferList: byId("autopool-offer-list"),
-  addPoolingButton: byId("add-pooling-button"),
   gigSection: byId("gig-section"),
   gigRouteLine: byId("gig-route-line"),
   gigTitle: byId("gig-title"),

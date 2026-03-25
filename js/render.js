@@ -134,36 +134,6 @@ const renderOptions = (state) => {
     }
   });
 
-  if (elements.modeDetail) {
-    if (state.selectedMode === state.recommendedMode) {
-      elements.modeDetail.classList.add("hidden");
-      if (elements.modeDetailSummary)
-        elements.modeDetailSummary.textContent = "";
-      if (elements.modeDetailSelected)
-        elements.modeDetailSelected.textContent = "";
-      if (elements.modeDetailRecommended) {
-        elements.modeDetailRecommended.textContent = "";
-      }
-      if (elements.modeDetailTip) elements.modeDetailTip.textContent = "";
-    } else {
-      const selectedScore = state.routeScores[state.selectedMode];
-      const recommendedScore = state.routeScores[state.recommendedMode];
-      if (elements.modeDetailSummary) {
-        elements.modeDetailSummary.textContent = `${state.selectedMode} is viable, but ${state.recommendedMode} currently offers better timing confidence.`;
-      }
-      if (elements.modeDetailSelected) {
-        elements.modeDetailSelected.textContent = `${state.selectedMode}: ${selectedScore.minutes} min | ${Math.round(selectedScore.reliability * 100)}% reliable`;
-      }
-      if (elements.modeDetailRecommended) {
-        elements.modeDetailRecommended.textContent = `${state.recommendedMode}: ${recommendedScore.minutes} min | ${Math.round(recommendedScore.reliability * 100)}% reliable`;
-      }
-      if (elements.modeDetailTip) {
-        elements.modeDetailTip.textContent = `Reason: ${state.recommendation.rationale}`;
-      }
-      elements.modeDetail.classList.remove("hidden");
-    }
-  }
-
   pulse(elements.optionsGrid);
 };
 
@@ -230,10 +200,10 @@ const renderAutopool = (state) => {
 
   if (elements.autopoolOfferList) {
     elements.autopoolOfferList.innerHTML = "";
-    offers.slice(1, 2).forEach((offer) => {
+    offers.slice(0, 2).forEach((offer) => {
       const item = document.createElement("div");
       item.className =
-        "border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-[#1f1f1f] px-2 py-2";
+        "shrink-0 snap-start w-[210px] border-2 border-black dark:border-white bg-[#FFF9EF] dark:bg-[#1f1f1f] px-2 py-2 rounded-md";
       item.innerHTML = `
         <p class="font-mono text-[10px] uppercase font-bold text-black dark:text-white">${offer.driverName} | ${offer.driverLabel}</p>
         <p class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1">${offer.vehicle} | ${offer.seats} seats | +${offer.impactMinutes} min</p>
@@ -241,10 +211,17 @@ const renderAutopool = (state) => {
       `;
       elements.autopoolOfferList.appendChild(item);
     });
-  }
 
-  if (elements.addPoolingButton) {
-    elements.addPoolingButton.textContent = "Add your own pooling";
+    const addCard = document.createElement("button");
+    addCard.type = "button";
+    addCard.className =
+      "pressable shrink-0 snap-start w-[210px] border-2 border-dashed border-black dark:border-white bg-white dark:bg-[#1f1f1f] px-2 py-2 rounded-md text-left";
+    addCard.innerHTML = `
+      <p class="font-mono text-[10px] uppercase font-bold text-black dark:text-white">Add pool by you</p>
+      <p class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300 mt-1">Create your own ride on this route</p>
+      <p class="font-mono text-[9px] uppercase text-gray-600 dark:text-gray-300">Set pickup, seats and ETA</p>
+    `;
+    elements.autopoolOfferList.appendChild(addCard);
   }
 
   pulse(elements.autopoolSection);

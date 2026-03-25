@@ -1,13 +1,13 @@
 export const DESTINATIONS = [
   "Central Library",
   "Main Building",
-  "Mechanical Block",
-  "Electrical Block",
-  "Civil Block",
-  "Computer Science Department",
-  "Architecture Department",
-  "Auditorium",
-  "Central Plaza",
+  "Mechanical Engineering Department",
+  "EEE Department",
+  "Civil Engineering Department",
+  "CSED",
+  "Department of Architecture and Planning",
+  "Nalanda Auditorium",
+  "Main Gate",
   "Open Air Theatre",
   "SAC",
   "MBH I",
@@ -18,7 +18,7 @@ export const DESTINATIONS = [
   "Mega Hostel",
   "Sports Complex",
   "Health Centre",
-  "Canteen Area",
+  "Mega Canteen",
 ];
 
 export const START_LOCATIONS = [
@@ -26,46 +26,64 @@ export const START_LOCATIONS = [
   "MBH II",
   "LH",
   "GH",
+  "Mega Hostel",
   "Main Building",
   "SAC",
-  "Central Plaza",
+  "Central Library",
 ];
 
 export const EVENTS = [
-  { name: "Tathva Workshop", location: "Main Building", label: "Workshop" },
+  { name: "Tathva Help Desk", location: "Main Building", label: "Fest" },
   {
-    name: "Ragam Cultural Event",
+    name: "Ragam Stage Rehearsal",
     location: "Open Air Theatre",
     label: "Live",
   },
-  { name: "IEEE Student Meet", location: "Electrical Block", label: "Meetup" },
   {
-    name: "Coding Club Session",
-    location: "Computer Science Department",
+    name: "IEEE Execom Meetup",
+    location: "EEE Department",
+    label: "Meetup",
+  },
+  {
+    name: "FOSS Cell Code Sprint",
+    location: "CSED",
     label: "Club",
   },
-  { name: "Robotics Club Meet", location: "Mechanical Block", label: "Lab" },
-  { name: "Dance Club Practice", location: "Auditorium", label: "Practice" },
-  { name: "Literary Club Meetup", location: "Central Library", label: "Talk" },
-  { name: "Quiz Club Event", location: "SAC", label: "Event" },
+  {
+    name: "Robotics Lab Demo",
+    location: "Mechanical Engineering Department",
+    label: "Lab",
+  },
+  {
+    name: "Design Jury Open House",
+    location: "Department of Architecture and Planning",
+    label: "Studio",
+  },
+  {
+    name: "Literary Circle Reading",
+    location: "Central Library",
+    label: "Talk",
+  },
+  { name: "Film Club Screening", location: "Nalanda Auditorium", label: "Event" },
 ];
 
 export const MICRO_GIGS = [
-  { title: "Deliver coffee", location: "Central Library" },
   { title: "Return library book", location: "Central Library" },
-  { title: "Pick up printouts", location: "Computer Science Department" },
-  { title: "Drop documents", location: "Main Building" },
-  { title: "Carry equipment", location: "SAC" },
-  { title: "Help set up event posters", location: "Central Plaza" },
+  { title: "Pick up printouts", location: "CSED" },
+  { title: "Drop signed form", location: "Main Building" },
+  { title: "Carry lab record", location: "EEE Department" },
+  { title: "Bring drafting sheets", location: "Department of Architecture and Planning" },
+  { title: "Drop poster stand", location: "SAC" },
+  { title: "Submit workshop file", location: "Civil Engineering Department" },
 ];
 
 export const AUTOPOOL_USERS = [
   { name: "Rahul M.", label: "Mechanical 26" },
   { name: "Ananya S.", label: "ECE 25" },
-  { name: "Arjun K.", label: "CS 27" },
+  { name: "Arjun K.", label: "CSED 27" },
   { name: "Neha P.", label: "Civil 26" },
-  { name: "Sarah K.", label: "Biology 26" },
-  { name: "Adithya R.", label: "Architecture 25" },
+  { name: "Sarah K.", label: "Chemical 26" },
+  { name: "Adithya R.", label: "Arch 25" },
 ];
 
 export const AUTOPOOL_MOCK_OFFERS = [
@@ -73,7 +91,7 @@ export const AUTOPOOL_MOCK_OFFERS = [
     name: "Rahul M.",
     label: "Mechanical 26",
     vehicle: "Hatchback",
-    pickup: "MBH Gate",
+    pickup: "MBH II Bus Bay",
   },
   {
     name: "Ananya S.",
@@ -83,27 +101,27 @@ export const AUTOPOOL_MOCK_OFFERS = [
   },
   {
     name: "Arjun K.",
-    label: "CS 27",
+    label: "CSED 27",
     vehicle: "Sedan",
-    pickup: "Main Building Steps",
+    pickup: "Main Building Portico",
   },
   {
     name: "Neha P.",
     label: "Civil 26",
     vehicle: "SUV",
-    pickup: "Central Plaza East",
+    pickup: "Main Gate",
   },
   {
     name: "Sarah K.",
-    label: "Biology 26",
+    label: "Chemical 26",
     vehicle: "Hatchback",
-    pickup: "Library Side Gate",
+    pickup: "Library East Gate",
   },
   {
     name: "Adithya R.",
-    label: "Architecture 25",
+    label: "Arch 25",
     vehicle: "EV Scooter",
-    pickup: "LH Junction",
+    pickup: "LH Gate",
   },
 ];
 
@@ -158,12 +176,19 @@ export const RATIONALES = {
 export const COORDS = {
   "Central Library": { lat: 11.3218, lon: 75.9349 },
   "Main Building": { lat: 11.321, lon: 75.934 },
+  "Mechanical Engineering Department": { lat: 11.3217, lon: 75.9355 },
   "Mechanical Block": { lat: 11.3217, lon: 75.9355 },
+  "EEE Department": { lat: 11.3221, lon: 75.935 },
   "Electrical Block": { lat: 11.3221, lon: 75.935 },
+  "Civil Engineering Department": { lat: 11.3212, lon: 75.9352 },
   "Civil Block": { lat: 11.3212, lon: 75.9352 },
+  CSED: { lat: 11.3206, lon: 75.9345 },
   "Computer Science Department": { lat: 11.3206, lon: 75.9345 },
+  "Department of Architecture and Planning": { lat: 11.3209, lon: 75.9337 },
   "Architecture Department": { lat: 11.3209, lon: 75.9337 },
+  "Nalanda Auditorium": { lat: 11.3224, lon: 75.9342 },
   Auditorium: { lat: 11.3224, lon: 75.9342 },
+  "Main Gate": { lat: 11.3214, lon: 75.9347 },
   "Central Plaza": { lat: 11.3214, lon: 75.9347 },
   "Open Air Theatre": { lat: 11.322, lon: 75.9338 },
   SAC: { lat: 11.3208, lon: 75.9349 },
@@ -175,6 +200,7 @@ export const COORDS = {
   "Mega Hostel": { lat: 11.3188, lon: 75.9356 },
   "Sports Complex": { lat: 11.3228, lon: 75.9358 },
   "Health Centre": { lat: 11.3213, lon: 75.9333 },
+  "Mega Canteen": { lat: 11.321, lon: 75.935 },
   "Canteen Area": { lat: 11.321, lon: 75.935 },
 };
 
